@@ -11,13 +11,7 @@ const Auth0ProviderWithHistory = ({ children }) => {
   const redirectUri = window.location.origin;
 
   const onRedirectCallback = (appState) => {
-    console.log('=== Auth0 Redirect Callback ===');
-    console.log('appState:', appState);
-    console.log('window.location:', window.location.href);
-    
-    // Always redirect to dashboard after successful authentication
     const targetUrl = appState?.returnTo || '/dashboard';
-    console.log('Redirecting to:', targetUrl);
     
     // Use setTimeout to ensure Auth0 state is fully updated
     setTimeout(() => {

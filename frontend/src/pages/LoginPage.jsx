@@ -7,18 +7,12 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('LoginPage - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
     if (isAuthenticated) {
-      console.log('User is authenticated, redirecting to dashboard...');
       navigate('/dashboard');
     }
-    if (error) {
-      console.error('Auth0 error:', error);
-    }
-  }, [isAuthenticated, isLoading, error, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = () => {
-    console.log('=== Starting Login Flow ===');
     loginWithRedirect({
       appState: {
         returnTo: '/dashboard'
@@ -30,7 +24,6 @@ const LoginPage = () => {
   };
 
   const handleSignup = () => {
-    console.log('=== Starting Signup Flow ===');
     loginWithRedirect({
       appState: {
         returnTo: '/dashboard'
@@ -41,16 +34,6 @@ const LoginPage = () => {
       }
     });
   };
-
-  // Debug info
-  console.log('=== LOGIN PAGE DEBUG ===');
-  console.log('isAuthenticated:', isAuthenticated);
-  console.log('isLoading:', isLoading);
-  console.log('error:', error);
-  console.log('ENV - Domain:', process.env.REACT_APP_AUTH0_DOMAIN);
-  console.log('ENV - Client ID:', process.env.REACT_APP_AUTH0_CLIENT_ID ? 'Set' : 'Missing');
-  console.log('ENV - Audience:', process.env.REACT_APP_AUTH0_AUDIENCE);
-  console.log('========================');
 
   if (isLoading) {
     return (
@@ -118,17 +101,6 @@ const LoginPage = () => {
               <p>Offline Access</p>
             </div>
           </div>
-        </div>
-
-        {/* Debug Info */}
-        <div className="mt-6 p-4 bg-gray-100 rounded text-xs text-left">
-          <p className="font-semibold mb-2">Debug Info:</p>
-          <p>Authenticated: {isAuthenticated ? '✅ Yes' : '❌ No'}</p>
-          <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
-          <p>Error: {error ? '❌ ' + error.message : '✅ None'}</p>
-          <p>Domain: {process.env.REACT_APP_AUTH0_DOMAIN || '❌ Missing'}</p>
-          <p>Client ID: {process.env.REACT_APP_AUTH0_CLIENT_ID ? '✅ Set' : '❌ Missing'}</p>
-          <p>Audience: {process.env.REACT_APP_AUTH0_AUDIENCE || '❌ Missing'}</p>
         </div>
       </div>
     </div>

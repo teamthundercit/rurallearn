@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import AIInteraction from '../models/AIInteraction.js';
+import tfRecommendationService from './tfRecommendationService.js';
 
 // Lazy initialization of Gemini AI client
 let genAI = null;
@@ -145,11 +146,35 @@ Provide your response in the following JSON format:
 
     return recommendations;
   } catch (error) {
-    console.error('Error generating recommendations:', error);
+    console.error('Gemini API error:', error.message);
     
-    // Fallback: Return rule-based recommendations if AI fails
-    console.log('Using fallback rule-based recommendations');
+    // Try TensorFlow.js fallback first
+    try {
+      console.log('→ Using TensorFlow.js local AI model');
+      const tfRecommendations = await tfRecommendationService.generateRecommendations(
+        user,
+        progressData,
+        allLessons
+      );
+      
+      // Store AI interaction
+      await AIInteraction.create({
+        userId: user._id,
+        type: 'recommendation',
+        input: {
+          completedLessons: progressData.filter(p => p.status === 'completed').length,
+          source: 'tensorflow'
+        },
+        output: tfRecommendations
+      });
+      
+      return tfRecommendations;
+    } catch (tfError) {
+      console.error('TensorFlow fallback error:', tfError.message);
+      console.log('→ Using rule-based recommendations');
+    }
     
+    // Final fallback: Rule-based recommendations
     const completedLessons = progressData.filter(p => p.status === 'completed');
     const completedLessonIds = completedLessons.map(p => p.lessonId.toString());
     const availableLessons = allLessons.filter(

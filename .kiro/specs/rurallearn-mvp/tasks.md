@@ -139,35 +139,54 @@
     - Add quiz questions with multiple choice options
     - _Requirements: 3.1, 3.2_
 
-- [ ] 7. Build lesson viewer frontend
-  - [ ] 7.1 Create LessonPage component
+- [x] 7. Build lesson viewer frontend
+
+
+
+
+
+  - [x] 7.1 Create LessonPage component
+
+
     - Implement lesson content display for text and video
     - Fetch lesson data from /api/lessons/:id
     - Create VideoPlayer component for video lessons
     - Display lesson title, description, and content
     - Add navigation back to dashboard
     - _Requirements: 3.1, 3.2_
-  - [ ] 7.2 Implement quiz functionality in frontend
+  - [x] 7.2 Implement quiz functionality in frontend
+
+
     - Create QuizComponent to display quiz questions
     - Implement answer selection and submission
     - Display quiz results with score and correct answers
     - Show explanations for each question
     - _Requirements: 3.3, 3.6_
 
-- [ ] 8. Implement progress tracking
-  - [ ] 8.1 Create progress service and controller
+- [x] 8. Implement progress tracking
+
+
+
+
+  - [x] 8.1 Create progress service and controller
+
+
     - Implement getProgress function to retrieve user progress
     - Implement recordLessonCompletion function
     - Implement submitQuiz function to calculate and store quiz results
     - Update progress status and timestamps
     - _Requirements: 5.1, 5.4_
-  - [ ] 8.2 Create progress API endpoints
+  - [x] 8.2 Create progress API endpoints
+
+
     - Implement GET /api/progress endpoint with authentication
     - Implement POST /api/progress/lesson/:id endpoint
     - Implement POST /api/progress/quiz/:id endpoint
     - Return updated progress data after submissions
     - _Requirements: 3.4, 3.5, 5.1_
-  - [ ] 8.3 Integrate progress tracking in frontend
+  - [x] 8.3 Integrate progress tracking in frontend
+
+
     - Call progress API when lesson is completed
     - Call quiz submission API when quiz is submitted
     - Update dashboard with new progress data

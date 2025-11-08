@@ -72,4 +72,69 @@ export const getUserProgress = async (token) => {
   }
 };
 
+// Lesson API functions
+export const getLessons = async (token, filters = {}) => {
+  try {
+    const params = new URLSearchParams();
+    if (filters.difficulty) params.append('difficulty', filters.difficulty);
+    if (filters.tags) params.append('tags', filters.tags);
+    
+    const response = await api.get(`/api/lessons?${params.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to fetch lessons');
+  }
+};
+
+export const getLessonById = async (token, lessonId) => {
+  try {
+    const response = await api.get(`/api/lessons/${lessonId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to fetch lesson');
+  }
+};
+
+// Quiz submission API function
+export const submitQuiz = async (token, lessonId, answers) => {
+  try {
+    const response = await api.post(`/api/progress/quiz/${lessonId}`, 
+      { answers },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to submit quiz');
+  }
+};
+
+// Record lesson completion
+export const recordLessonCompletion = async (token, lessonId, timeSpent = 0) => {
+  try {
+    const response = await api.post(`/api/progress/lesson/${lessonId}`,
+      { timeSpent },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to record lesson completion');
+  }
+};
+
 export default api;

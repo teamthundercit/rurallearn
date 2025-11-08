@@ -5,6 +5,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import CallbackPage from './pages/CallbackPage';
 import DashboardPage from './pages/DashboardPage';
+import LessonsListPage from './pages/LessonsListPage';
+import LessonPage from './pages/LessonPage';
 
 function App() {
   return (
@@ -19,6 +21,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lessons"
+            element={
+              <ProtectedRoute>
+                <LessonsListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/lessons/:lessonId"
+            element={
+              <ProtectedRoute>
+                <LessonPage />
               </ProtectedRoute>
             }
           />

@@ -42,7 +42,13 @@ const DashboardPage = () => {
         ]);
 
         setUserData(userResponse.data?.user || userResponse.user);
-        setProgressData(progressResponse.data?.progress || progressResponse.progress || []);
+        
+        // Handle progress data structure
+        const progressInfo = progressResponse.data || progressResponse;
+        setProgressData({
+          progress: progressInfo.progress || [],
+          summary: progressInfo.summary || null
+        });
       } catch (err) {
         console.error('Error loading dashboard data:', err);
         setError(err.message || 'Failed to load dashboard data. Please try again.');
@@ -90,9 +96,19 @@ const DashboardPage = () => {
     );
   }
 
-  // Calculate progress metrics
-  const calculateMetrics = () => {
-    if (!progressData || progressData.length === 0) {
+  // Get progress metrics from summary or calculate from progress data
+  const getMetrics = () => {
+    // Use summary data from backend if available
+    if (progressData?.summary) {
+      return {
+        completedLessons: progressData.summary.completedLessons || 0,
+        averageScore: progressData.summary.averageQuizScore || 0,
+        totalTimeSpent: progressData.summary.totalTimeSpent || 0
+      };
+    }
+
+    // Fallback to calculating from progress array
+    if (!progressData?.progress || progressData.progress.length === 0) {
       return {
         completedLessons: 0,
         averageScore: 0,
@@ -100,9 +116,9 @@ const DashboardPage = () => {
       };
     }
 
-    const completedLessons = progressData.filter(p => p.status === 'completed').length;
+    const completedLessons = progressData.progress.filter(p => p.status === 'completed').length;
     
-    const quizScores = progressData
+    const quizScores = progressData.progress
       .filter(p => p.quizScore !== null && p.quizScore !== undefined)
       .map(p => p.quizScore);
     
@@ -110,7 +126,7 @@ const DashboardPage = () => {
       ? Math.round(quizScores.reduce((sum, score) => sum + score, 0) / quizScores.length)
       : 0;
     
-    const totalTimeSpent = progressData.reduce((sum, p) => sum + (p.timeSpent || 0), 0);
+    const totalTimeSpent = progressData.progress.reduce((sum, p) => sum + (p.timeSpent || 0), 0);
 
     return {
       completedLessons,
@@ -119,7 +135,7 @@ const DashboardPage = () => {
     };
   };
 
-  const metrics = calculateMetrics();
+  const metrics = getMetrics();
   const displayUser = userData || user;
 
   return (
@@ -191,30 +207,59 @@ const DashboardPage = () => {
         </div>
 
         {/* Recent Progress Section */}
-        {progressData && progressData.length > 0 && (
+        {progressData?.progress && progressData.progress.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
               Recent Progress
             </h3>
             <div className="space-y-3">
-              {progressData.slice(0, 5).map((progress, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              {progressData.progress.slice(0, 5).map((progress, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/lessons/${progress.lessonId?._id || progress.lessonId}`)}
+                >
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">
-                      Lesson {progress.lessonId}
+                      {progress.lessonId?.title || `Lesson ${progress.lessonId}`}
                     </p>
-                    <p className="text-sm text-gray-600 capitalize">
-                      Status: {progress.status}
-                    </p>
-                  </div>
-                  {progress.quizScore !== null && progress.quizScore !== undefined && (
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-primary-600">
-                        {progress.quizScore}%
-                      </p>
-                      <p className="text-xs text-gray-500">Quiz Score</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                        progress.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        progress.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {progress.status.replace('_', ' ')}
+                      </span>
+                      {progress.lessonId?.difficulty && (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                          progress.lessonId.difficulty === 'beginner' ? 'bg-blue-100 text-blue-800' :
+                          progress.lessonId.difficulty === 'intermediate' ? 'bg-purple-100 text-purple-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {progress.lessonId.difficulty}
+                        </span>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    {progress.timeSpent > 0 && (
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-700">
+                          {Math.round(progress.timeSpent)}m
+                        </p>
+                        <p className="text-xs text-gray-500">Time Spent</p>
+                      </div>
+                    )}
+                    {progress.quizScore !== null && progress.quizScore !== undefined && (
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-primary-600">
+                          {progress.quizScore}%
+                        </p>
+                        <p className="text-xs text-gray-500">Quiz Score</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -229,7 +274,7 @@ const DashboardPage = () => {
                 Ready to Learn?
               </h3>
               <p className="text-gray-600">
-                {progressData && progressData.length > 0
+                {progressData?.progress && progressData.progress.length > 0
                   ? 'Continue your learning journey with new lessons'
                   : 'Start your learning journey by exploring available lessons'}
               </p>

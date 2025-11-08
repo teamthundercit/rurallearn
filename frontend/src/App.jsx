@@ -8,7 +8,6 @@ import { useOfflineSync } from './utils/useOfflineSync';
 
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage'));
-const CallbackPage = lazy(() => import('./pages/CallbackPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LessonsListPage = lazy(() => import('./pages/LessonsListPage'));
 const LessonPage = lazy(() => import('./pages/LessonPage'));
@@ -23,8 +22,17 @@ const LoadingSpinner = () => (
 );
 
 function AppContent() {
-  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
   const [token, setToken] = React.useState(null);
+
+  // Check if we're handling an Auth0 callback
+  // Only show loading if we have the callback params AND we're not yet authenticated
+  const isAuth0Callback = React.useMemo(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const hasCallbackParams = searchParams.has('code') && searchParams.has('state');
+    // Only consider it a callback if we have the params AND we're still loading or not authenticated
+    return hasCallbackParams && (isLoading || !isAuthenticated);
+  }, [isLoading, isAuthenticated]);
 
   // Get token for offline sync
   React.useEffect(() => {
@@ -41,16 +49,39 @@ function AppContent() {
     getToken();
   }, [isAuthenticated, getAccessTokenSilently]);
 
+  // IMPORTANT: Call all hooks before any conditional returns
   const { isOnline, isSyncing, unsyncedCount } = useOfflineSync(token);
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('=== App State ===');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('isLoading:', isLoading);
+    console.log('isAuth0Callback:', isAuth0Callback);
+    console.log('Current path:', window.location.pathname);
+    console.log('================');
+  }, [isAuthenticated, isLoading, isAuth0Callback]);
+
+  // Show loading spinner during Auth0 callback processing
+  // But only if we're actually loading, not if we're already authenticated
+  if (isLoading) {
+    console.log('Auth0 loading...');
+    return <LoadingSpinner />;
+  }
+  
+  // If we have callback params but we're authenticated, Auth0 is done - let it through
+  if (isAuth0Callback && !isAuthenticated) {
+    console.log('Auth0 processing callback...');
+    return <LoadingSpinner />;
+  }
 
   return (
     <>
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
+          <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
           <Route path="/test-auth" element={<TestAuthPage />} />
-          <Route path="/callback" element={<CallbackPage />} />
           <Route
             path="/dashboard"
             element={

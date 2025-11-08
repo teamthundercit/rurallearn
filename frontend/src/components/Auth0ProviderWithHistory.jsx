@@ -11,7 +11,18 @@ const Auth0ProviderWithHistory = ({ children }) => {
   const redirectUri = window.location.origin;
 
   const onRedirectCallback = (appState) => {
-    navigate(appState?.returnTo || '/dashboard');
+    console.log('=== Auth0 Redirect Callback ===');
+    console.log('appState:', appState);
+    console.log('window.location:', window.location.href);
+    
+    // Always redirect to dashboard after successful authentication
+    const targetUrl = appState?.returnTo || '/dashboard';
+    console.log('Redirecting to:', targetUrl);
+    
+    // Use setTimeout to ensure Auth0 state is fully updated
+    setTimeout(() => {
+      navigate(targetUrl, { replace: true });
+    }, 100);
   };
 
   if (!domain || !clientId || !audience) {
@@ -40,7 +51,6 @@ const Auth0ProviderWithHistory = ({ children }) => {
       onRedirectCallback={onRedirectCallback}
       useRefreshTokens={true}
       cacheLocation="localstorage"
-      skipRedirectCallback={window.location.pathname === '/test-auth'}
     >
       {children}
     </Auth0Provider>

@@ -22,6 +22,9 @@ const DashboardPage = () => {
         setError(null);
 
         // Get access token
+        console.log('=== Getting Access Token ===');
+        console.log('Audience:', process.env.REACT_APP_AUTH0_AUDIENCE);
+
         const token = await getAccessTokenSilently({
           authorizationParams: {
             audience: process.env.REACT_APP_AUTH0_AUDIENCE,
@@ -29,12 +32,21 @@ const DashboardPage = () => {
           }
         });
 
+        console.log('Token received:', token ? 'Yes (length: ' + token.length + ')' : 'No');
+        console.log('Token preview:', token ? token.substring(0, 50) + '...' : 'N/A');
+
         // Sync user with backend
-        await api.post('/api/auth/callback', {}, {
+        console.log('=== Calling /api/auth/callback ===');
+        console.log('API URL:', process.env.REACT_APP_API_URL);
+        console.log('Authorization header:', `Bearer ${token.substring(0, 20)}...`);
+
+        const callbackResponse = await api.post('/api/auth/callback', {}, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
+
+        console.log('Callback response:', callbackResponse.data);
 
         // Fetch user profile and progress data
         const [userResponse, progressResponse] = await Promise.all([
@@ -43,7 +55,7 @@ const DashboardPage = () => {
         ]);
 
         setUserData(userResponse.data?.user || userResponse.user);
-        
+
         // Handle progress data structure
         const progressInfo = progressResponse.data || progressResponse;
         setProgressData({
@@ -51,8 +63,14 @@ const DashboardPage = () => {
           summary: progressInfo.summary || null
         });
       } catch (err) {
-        console.error('Error loading dashboard data:', err);
-        setError(err.message || 'Failed to load dashboard data. Please try again.');
+        console.error('=== Dashboard Error ===');
+        console.error('Error:', err);
+        console.error('Error message:', err.message);
+        console.error('Error response:', err.response?.data);
+        console.error('Error status:', err.response?.status);
+        console.error('=====================');
+
+        setError(err.response?.data?.error?.message || err.message || 'Failed to load dashboard data. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -118,15 +136,15 @@ const DashboardPage = () => {
     }
 
     const completedLessons = progressData.progress.filter(p => p.status === 'completed').length;
-    
+
     const quizScores = progressData.progress
       .filter(p => p.quizScore !== null && p.quizScore !== undefined)
       .map(p => p.quizScore);
-    
+
     const averageScore = quizScores.length > 0
       ? Math.round(quizScores.reduce((sum, score) => sum + score, 0) / quizScores.length)
       : 0;
-    
+
     const totalTimeSpent = progressData.progress.reduce((sum, p) => sum + (p.timeSpent || 0), 0);
 
     return {
@@ -220,8 +238,8 @@ const DashboardPage = () => {
             </h3>
             <div className="space-y-3">
               {progressData.progress.slice(0, 5).map((progress, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                   onClick={() => navigate(`/lessons/${progress.lessonId?._id || progress.lessonId}`)}
                 >
@@ -230,19 +248,17 @@ const DashboardPage = () => {
                       {progress.lessonId?.title || `Lesson ${progress.lessonId}`}
                     </p>
                     <div className="flex items-center space-x-2 mt-1">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                        progress.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${progress.status === 'completed' ? 'bg-green-100 text-green-800' :
                         progress.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                          'bg-gray-100 text-gray-800'
+                        }`}>
                         {progress.status.replace('_', ' ')}
                       </span>
                       {progress.lessonId?.difficulty && (
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                          progress.lessonId.difficulty === 'beginner' ? 'bg-blue-100 text-blue-800' :
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${progress.lessonId.difficulty === 'beginner' ? 'bg-blue-100 text-blue-800' :
                           progress.lessonId.difficulty === 'intermediate' ? 'bg-purple-100 text-purple-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                            'bg-red-100 text-red-800'
+                          }`}>
                           {progress.lessonId.difficulty}
                         </span>
                       )}

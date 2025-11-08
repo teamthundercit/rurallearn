@@ -18,20 +18,26 @@ const LoginPage = () => {
   }, [isAuthenticated, isLoading, error, navigate]);
 
   const handleLogin = () => {
-    loginWithRedirect({
-      appState: {
-        returnTo: '/dashboard'
-      }
-    });
-  };
-
-  const handleSignup = () => {
+    console.log('=== Starting Login Flow ===');
     loginWithRedirect({
       appState: {
         returnTo: '/dashboard'
       },
       authorizationParams: {
-        screen_hint: 'signup'
+        redirect_uri: window.location.origin
+      }
+    });
+  };
+
+  const handleSignup = () => {
+    console.log('=== Starting Signup Flow ===');
+    loginWithRedirect({
+      appState: {
+        returnTo: '/dashboard'
+      },
+      authorizationParams: {
+        screen_hint: 'signup',
+        redirect_uri: window.location.origin
       }
     });
   };

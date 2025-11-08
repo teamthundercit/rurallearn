@@ -1,22 +1,31 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Auth0ProviderWithHistory from './components/Auth0ProviderWithHistory';
+import ProtectedRoute from './components/ProtectedRoute';
+import LoginPage from './pages/LoginPage';
+import CallbackPage from './pages/CallbackPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-primary-600 mb-4">
-          Welcome to RuralLearn
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Personalized learning platform for rural education
-        </p>
-        <div className="mt-8">
-          <button className="btn-primary">
-            Get Started
-          </button>
-        </div>
-      </div>
-    </div>
+    <Router>
+      <Auth0ProviderWithHistory>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/callback" element={<CallbackPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Auth0ProviderWithHistory>
+    </Router>
   );
 }
 

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { cacheLesson, getCachedLesson, queueProgressUpdate } from '../utils/indexedDB';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -97,8 +98,32 @@ export const getLessonById = async (token, lessonId) => {
         Authorization: `Bearer ${token}`
       }
     });
+    
+    // Cache the lesson for offline access
+    if (response.data && response.data.lesson) {
+      try {
+        await cacheLesson(response.data.lesson);
+      } catch (cacheError) {
+        console.warn('Failed to cache lesson:', cacheError);
+        // Continue even if caching fails
+      }
+    }
+    
     return response.data;
   } catch (error) {
+    // If network fails, try to get from cache
+    if (!navigator.onLine || error.message.includes('Network')) {
+      console.log('Network unavailable, attempting to retrieve from cache...');
+      try {
+        const cachedLesson = await getCachedLesson(lessonId);
+        if (cachedLesson) {
+          console.log('Serving lesson from cache');
+          return { lesson: cachedLesson, fromCache: true };
+        }
+      } catch (cacheError) {
+        console.error('Failed to retrieve from cache:', cacheError);
+      }
+    }
     throw new Error(error.response?.data?.error?.message || 'Failed to fetch lesson');
   }
 };
@@ -116,6 +141,24 @@ export const submitQuiz = async (token, lessonId, answers) => {
     );
     return response.data;
   } catch (error) {
+    // If offline, queue the submission
+    if (!navigator.onLine || error.message.includes('Network')) {
+      console.log('Offline: Queuing quiz submission');
+      try {
+        await queueProgressUpdate({
+          type: 'quizSubmission',
+          lessonId,
+          answers
+        });
+        return { 
+          success: true, 
+          queued: true, 
+          message: 'Quiz submission queued for sync when online' 
+        };
+      } catch (queueError) {
+        console.error('Failed to queue quiz submission:', queueError);
+      }
+    }
     throw new Error(error.response?.data?.error?.message || 'Failed to submit quiz');
   }
 };
@@ -133,6 +176,24 @@ export const recordLessonCompletion = async (token, lessonId, timeSpent = 0) => 
     );
     return response.data;
   } catch (error) {
+    // If offline, queue the completion
+    if (!navigator.onLine || error.message.includes('Network')) {
+      console.log('Offline: Queuing lesson completion');
+      try {
+        await queueProgressUpdate({
+          type: 'lessonCompletion',
+          lessonId,
+          timeSpent
+        });
+        return { 
+          success: true, 
+          queued: true, 
+          message: 'Lesson completion queued for sync when online' 
+        };
+      } catch (queueError) {
+        console.error('Failed to queue lesson completion:', queueError);
+      }
+    }
     throw new Error(error.response?.data?.error?.message || 'Failed to record lesson completion');
   }
 };

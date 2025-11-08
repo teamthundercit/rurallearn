@@ -1,11 +1,12 @@
 import express from 'express';
 import { getRecommendations, handleChat } from '../controllers/aiController.js';
-import { auth } from '../middleware/auth.js';
+import { checkJwt, extractUserInfo } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // All AI routes require authentication
-router.use(auth);
+router.use(checkJwt);
+router.use(extractUserInfo);
 
 /**
  * @route   POST /api/ai/recommendations

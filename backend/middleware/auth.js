@@ -1,11 +1,22 @@
 import { auth } from 'express-oauth2-jwt-bearer';
 
 // Auth0 JWT verification middleware
-export const checkJwt = auth({
-  audience: process.env.AUTH0_AUDIENCE,
-  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
-  tokenSigningAlg: 'RS256'
-});
+export const checkJwt = process.env.AUTH0_AUDIENCE && process.env.AUTH0_DOMAIN
+  ? auth({
+      audience: process.env.AUTH0_AUDIENCE,
+      issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
+      tokenSigningAlg: 'RS256'
+    })
+  : (req, res, next) => {
+      // Fallback for testing without Auth0 configured
+      res.status(401).json({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Invalid or expired authentication token'
+        }
+      });
+    };
 
 // Middleware to extract user info from token
 export const extractUserInfo = (req, res, next) => {

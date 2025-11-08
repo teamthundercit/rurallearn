@@ -1,11 +1,12 @@
 import express from 'express';
-import { auth } from '../middleware/auth.js';
+import { checkJwt, extractUserInfo } from '../middleware/auth.js';
 import * as progressController from '../controllers/progressController.js';
 
 const router = express.Router();
 
 // All progress routes require authentication
-router.use(auth);
+router.use(checkJwt);
+router.use(extractUserInfo);
 
 // GET /api/progress - Get user's progress records
 router.get('/', progressController.getUserProgress);

@@ -21,10 +21,6 @@ const DashboardPage = () => {
         setLoading(true);
         setError(null);
 
-        // Get access token
-        console.log('=== Getting Access Token ===');
-        console.log('Audience:', process.env.REACT_APP_AUTH0_AUDIENCE);
-
         const token = await getAccessTokenSilently({
           authorizationParams: {
             audience: process.env.REACT_APP_AUTH0_AUDIENCE,
@@ -32,21 +28,12 @@ const DashboardPage = () => {
           }
         });
 
-        console.log('Token received:', token ? 'Yes (length: ' + token.length + ')' : 'No');
-        console.log('Token preview:', token ? token.substring(0, 50) + '...' : 'N/A');
-
         // Sync user with backend
-        console.log('=== Calling /api/auth/callback ===');
-        console.log('API URL:', process.env.REACT_APP_API_URL);
-        console.log('Authorization header:', `Bearer ${token.substring(0, 20)}...`);
-
-        const callbackResponse = await api.post('/api/auth/callback', {}, {
+        await api.post('/api/auth/callback', {}, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-
-        console.log('Callback response:', callbackResponse.data);
 
         // Fetch user profile and progress data
         const [userResponse, progressResponse] = await Promise.all([
@@ -59,7 +46,6 @@ const DashboardPage = () => {
 
         // Check if onboarding is completed
         if (!fetchedUser.preferences?.onboardingCompleted) {
-          console.log('Onboarding not completed, redirecting...');
           navigate('/onboarding');
           return;
         }
@@ -71,13 +57,7 @@ const DashboardPage = () => {
           summary: progressInfo.summary || null
         });
       } catch (err) {
-        console.error('=== Dashboard Error ===');
-        console.error('Error:', err);
-        console.error('Error message:', err.message);
-        console.error('Error response:', err.response?.data);
-        console.error('Error status:', err.response?.status);
-        console.error('=====================');
-
+        console.error('Dashboard error:', err.message);
         setError(err.response?.data?.error?.message || err.message || 'Failed to load dashboard data. Please try again.');
       } finally {
         setLoading(false);

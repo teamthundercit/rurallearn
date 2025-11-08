@@ -1,16 +1,27 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import AIInteraction from '../models/AIInteraction.js';
 
-// Check if API key is configured
-if (!process.env.GEMINI_API_KEY) {
-  console.warn('⚠️  GEMINI_API_KEY not configured. AI features will use fallback mode.');
-  console.warn('   Get your API key at: https://aistudio.google.com/app/apikey');
-}
+// Lazy initialization of Gemini AI client
+let genAI = null;
+let apiKeyChecked = false;
 
-// Initialize Gemini AI client
-const genAI = process.env.GEMINI_API_KEY 
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  : null;
+/**
+ * Get or initialize Gemini AI client
+ * @returns {GoogleGenerativeAI|null} Gemini AI client instance
+ */
+const getGenAI = () => {
+  if (!apiKeyChecked) {
+    apiKeyChecked = true;
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn('⚠️  GEMINI_API_KEY not configured. AI features will use fallback mode.');
+      console.warn('   Get your API key at: https://aistudio.google.com/app/apikey');
+    } else {
+      genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      console.log('✓ Gemini AI initialized successfully');
+    }
+  }
+  return genAI;
+};
 
 /**
  * Get Gemini AI model instance
@@ -18,7 +29,11 @@ const genAI = process.env.GEMINI_API_KEY
  * @returns {Object} Gemini model instance
  */
 export const getModel = (modelName = 'gemini-2.5-flash') => {
-  return genAI.getGenerativeModel({ model: modelName });
+  const client = getGenAI();
+  if (!client) {
+    throw new Error('Gemini API not configured');
+  }
+  return client.getGenerativeModel({ model: modelName });
 };
 
 /**
@@ -30,8 +45,9 @@ export const getModel = (modelName = 'gemini-2.5-flash') => {
  */
 export const generateRecommendations = async (user, progressData, allLessons) => {
   try {
-    // If no API key, skip to fallback
-    if (!genAI) {
+    // Check if Gemini API is available
+    const client = getGenAI();
+    if (!client) {
       throw new Error('Gemini API not configured');
     }
     
@@ -143,7 +159,6 @@ Provide your response in the following JSON format:
     // Rule-based recommendation logic
     const userPreferences = user.preferences || {};
     const preferredDifficulty = userPreferences.difficultyLevel || 'beginner';
-    const topicsOfInterest = userPreferences.topicsOfInterest || [];
     
     // Filter and sort lessons
     let recommendedLessons = availableLessons

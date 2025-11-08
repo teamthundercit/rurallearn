@@ -1,23 +1,8 @@
 import { auth } from 'express-oauth2-jwt-bearer';
 
-// Middleware to log incoming requests for debugging
+// Middleware to log incoming requests
 export const logRequest = (req, res, next) => {
-  console.log('=== Incoming Request ===');
-  console.log('Method:', req.method);
-  console.log('Path:', req.path);
-  console.log('Authorization header:', req.headers.authorization ? 'Present' : 'Missing');
-  if (req.headers.authorization) {
-    const token = req.headers.authorization.replace('Bearer ', '');
-    console.log('Token preview:', token.substring(0, 50) + '...');
-    // Decode token payload (without verification) for debugging
-    try {
-      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-      console.log('Token payload:', JSON.stringify(payload, null, 2));
-    } catch (e) {
-      console.log('Could not decode token payload');
-    }
-  }
-  console.log('=======================');
+  console.log(`${req.method} ${req.path}`);
   next();
 };
 
@@ -27,17 +12,13 @@ let jwtMiddleware = null;
 export const checkJwt = (req, res, next) => {
   // Initialize middleware on first request (after env vars are loaded)
   if (!jwtMiddleware) {
-    console.log('Initializing JWT middleware...');
-    console.log('AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
-    console.log('AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
-    
     if (process.env.AUTH0_AUDIENCE && process.env.AUTH0_DOMAIN) {
       jwtMiddleware = auth({
         audience: process.env.AUTH0_AUDIENCE,
         issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
         tokenSigningAlg: 'RS256'
       });
-      console.log('JWT middleware initialized successfully');
+      console.log('✓ JWT middleware initialized');
     } else {
       console.error('Cannot initialize JWT middleware - missing AUTH0_AUDIENCE or AUTH0_DOMAIN');
       return res.status(500).json({
@@ -57,26 +38,40 @@ export const checkJwt = (req, res, next) => {
 // Middleware to extract user info from token
 export const extractUserInfo = async (req, res, next) => {
   try {
-    console.log('=== Extracting User Info ===');
-    
     if (req.auth && req.auth.payload) {
       const payload = req.auth.payload;
       const namespace = process.env.AUTH0_AUDIENCE;
-      
-      console.log('Token payload:', payload);
       
       // Get user info from token payload
       let email = payload[`${namespace}/email`] || payload.email;
       let name = payload[`${namespace}/name`] || payload.name;
       const sub = payload.sub;
       
-      // If email/name not in token, use sub as fallback
+      // If email/name not in token, fetch from Auth0 userinfo endpoint
       if (!email || !name) {
-        console.log('Email or name missing from token, using sub as fallback');
-        // Use sub (user ID) as email fallback
-        email = sub;
-        // Extract name from sub (e.g., "google-oauth2|113181514516139244142" -> "113181514516139244142")
-        name = sub.includes('|') ? sub.split('|')[1] : sub;
+        try {
+          const token = req.headers.authorization?.replace('Bearer ', '');
+          if (token) {
+            const axios = (await import('axios')).default;
+            const userInfoResponse = await axios.get(
+              `https://${process.env.AUTH0_DOMAIN}/userinfo`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              }
+            );
+            
+            const userInfo = userInfoResponse.data;
+            email = email || userInfo.email || sub;
+            name = name || userInfo.name || userInfo.nickname || 'User';
+          }
+        } catch (fetchError) {
+          console.error('Error fetching user info from Auth0:', fetchError.message);
+          // Fallback to using sub
+          email = email || sub;
+          name = name || 'User';
+        }
       }
       
       // Extract user information from the token
@@ -84,14 +79,9 @@ export const extractUserInfo = async (req, res, next) => {
         auth0Id: sub,
         email: email,
         name: name,
-        role: payload[`${namespace}/role`] || 'student'
+        role: payload[`${namespace}/role`] || 'student',
+        avatar: payload.picture || null
       };
-      
-      console.log('Extracted user:', req.user);
-      console.log('===========================');
-    } else {
-      console.log('No req.auth.payload found');
-      console.log('===========================');
     }
     next();
   } catch (error) {

@@ -1,29 +1,23 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import dotenv from 'dotenv';
+
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables FIRST before any other imports
+dotenv.config({ path: join(__dirname, '.env') });
+
+// Now import everything else after env vars are loaded
+import express from 'express';
+import cors from 'cors';
 import connectDB from './config/database.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import lessonRoutes from './routes/lessonRoutes.js';
 import progressRoutes from './routes/progressRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
-
-// Get current directory for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Load environment variables with explicit path
-dotenv.config({ path: join(__dirname, '.env') });
-
-// Debug: Log environment variables
-console.log('=== Environment Variables ===');
-console.log('AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN || 'NOT SET');
-console.log('AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE || 'NOT SET');
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'SET' : 'NOT SET');
-console.log('GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'SET' : 'NOT SET');
-console.log('============================');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -81,19 +75,10 @@ app.use((req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('=== ERROR DETAILS ===');
-  console.error('Error name:', err.name);
-  console.error('Error message:', err.message);
-  console.error('Error code:', err.code);
-  console.error('Error status:', err.status);
-  console.error('Full error:', err);
-  console.error('====================');
+  console.error('Error:', err.message);
 
   // Handle Auth0 JWT errors
   if (err.name === 'UnauthorizedError' || err.name === 'InvalidTokenError') {
-    console.error('JWT Verification failed:');
-    console.error('- Expected audience:', process.env.AUTH0_AUDIENCE);
-    console.error('- Expected issuer:', `https://${process.env.AUTH0_DOMAIN}/`);
     return res.status(401).json({
       success: false,
       error: {

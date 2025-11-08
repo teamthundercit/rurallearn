@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth0 } from '@auth0/auth0-react';
 import Auth0ProviderWithHistory from './components/Auth0ProviderWithHistory';
 import ProtectedRoute from './components/ProtectedRoute';
+import OfflineIndicator from './components/OfflineIndicator';
+import { useOffline } from './hooks/useOffline';
 
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -10,6 +12,7 @@ const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LessonsListPage = lazy(() => import('./pages/LessonsListPage'));
 const LessonPage = lazy(() => import('./pages/LessonPage'));
+const RefreshPage = lazy(() => import('./pages/RefreshPage'));
 const ChatbotWidget = lazy(() => import('./components/ChatbotWidget'));
 
 // Loading component
@@ -21,6 +24,7 @@ const LoadingSpinner = () => (
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth0();
+  const { isOnline, isSyncing, unsyncedCount } = useOffline();
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -64,10 +68,23 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/refresh"
+            element={
+              <ProtectedRoute>
+                <RefreshPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
 
         {isAuthenticated && <ChatbotWidget />}
+        <OfflineIndicator 
+          isOnline={isOnline} 
+          isSyncing={isSyncing} 
+          unsyncedCount={unsyncedCount} 
+        />
       </Suspense>
     </>
   );

@@ -51,7 +51,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - implement cache-first strategy for static assets
+// Fetch event - implement cache strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -61,8 +61,38 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip API requests (they should go through network)
+  // Network-first strategy for API requests (with offline fallback)
   if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache successful API responses
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Network failed, try cache
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              console.log('[Service Worker] Serving API from cache (offline):', request.url);
+              return cachedResponse;
+            }
+            // Return offline response
+            return new Response(
+              JSON.stringify({ error: 'Offline', offline: true }),
+              { 
+                status: 503,
+                headers: { 'Content-Type': 'application/json' }
+              }
+            );
+          });
+        })
+    );
     return;
   }
 
@@ -72,7 +102,15 @@ self.addEventListener('fetch', (event) => {
       caches.match(request)
         .then((cachedResponse) => {
           if (cachedResponse) {
-            console.log('[Service Worker] Serving from cache:', request.url);
+            // Serve from cache, but update in background
+            fetch(request).then((response) => {
+              if (response && response.status === 200) {
+                caches.open(STATIC_CACHE_NAME).then((cache) => {
+                  cache.put(request, response);
+                });
+              }
+            }).catch(() => {});
+            
             return cachedResponse;
           }
 

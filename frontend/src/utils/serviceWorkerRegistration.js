@@ -1,28 +1,29 @@
-// This optional code is used to register a service worker.
-// register() is not called by default.
+/**
+ * Service Worker Registration
+ * Handles registration and updates of the service worker
+ */
 
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
-    window.location.hostname === '[::1]' ||
-    window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
+  window.location.hostname === '[::1]' ||
+  window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
 );
 
 export function register(config) {
   if ('serviceWorker' in navigator) {
-    const publicUrl = new URL(process.env.PUBLIC_URL, window.location.href);
-    if (publicUrl.origin !== window.location.origin) {
-      return;
-    }
-
+    // Wait for page load
     window.addEventListener('load', () => {
       const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
 
       if (isLocalhost) {
+        // Check if service worker exists in localhost
         checkValidServiceWorker(swUrl, config);
+        
         navigator.serviceWorker.ready.then(() => {
           console.log('Service worker is ready for offline use.');
         });
       } else {
+        // Register service worker
         registerValidSW(swUrl, config);
       }
     });
@@ -34,24 +35,26 @@ function registerValidSW(swUrl, config) {
     .register(swUrl)
     .then((registration) => {
       console.log('Service Worker registered:', registration);
-      
+
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
           return;
         }
-        
+
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
-              console.log('New content available; please refresh.');
-              
+              // New content available
+              console.log('New content is available; please refresh.');
+
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
             } else {
-              console.log('Content cached for offline use.');
-              
+              // Content cached for offline use
+              console.log('Content is cached for offline use.');
+
               if (config && config.onSuccess) {
                 config.onSuccess(registration);
               }
@@ -66,6 +69,7 @@ function registerValidSW(swUrl, config) {
 }
 
 function checkValidServiceWorker(swUrl, config) {
+  // Check if the service worker can be found
   fetch(swUrl, {
     headers: { 'Service-Worker': 'script' },
   })
@@ -75,12 +79,14 @@ function checkValidServiceWorker(swUrl, config) {
         response.status === 404 ||
         (contentType != null && contentType.indexOf('javascript') === -1)
       ) {
+        // Service worker not found, reload page
         navigator.serviceWorker.ready.then((registration) => {
           registration.unregister().then(() => {
             window.location.reload();
           });
         });
       } else {
+        // Service worker found, proceed with registration
         registerValidSW(swUrl, config);
       }
     })

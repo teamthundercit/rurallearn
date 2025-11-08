@@ -3,9 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import './i18n/config'; // Initialize i18n
-// Temporarily disabled for debugging
-// import { logPerformanceMetrics } from './reportWebVitals';
-// import * as serviceWorkerRegistration from './utils/serviceWorkerRegistration';
+import * as serviceWorkerRegistration from './utils/serviceWorkerRegistration';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -14,15 +12,16 @@ root.render(
   </React.StrictMode>
 );
 
-// Temporarily disabled service worker for debugging
-// serviceWorkerRegistration.register({
-//   onSuccess: () => {
-//     console.log('Content cached for offline use.');
-//   },
-//   onUpdate: (registration) => {
-//     console.log('New content available; please refresh.');
-//   }
-// });
-
-// Temporarily disabled performance monitoring for debugging
-// logPerformanceMetrics();
+// Register service worker for offline functionality
+serviceWorkerRegistration.register({
+  onSuccess: () => {
+    console.log('✅ Content cached for offline use.');
+  },
+  onUpdate: (registration) => {
+    console.log('🔄 New content available; please refresh.');
+    // Optionally show a toast notification to user
+    if (window.confirm('New version available! Reload to update?')) {
+      window.location.reload();
+    }
+  }
+});

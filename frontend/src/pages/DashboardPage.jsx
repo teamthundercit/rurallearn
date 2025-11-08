@@ -15,17 +15,21 @@ import RecentAchievements from '../components/RecentAchievements';
 import StudyReminders from '../components/StudyReminders';
 import Leaderboard from '../components/Leaderboard';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import MoodCheckModal from '../components/MoodCheckModal';
+import useMoodCheck from '../hooks/useMoodCheck';
 
 const DashboardPage = () => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const api = useApi();
   const { t } = useTranslation();
+  const { shouldShowMoodCheck, recordMoodCheck } = useMoodCheck();
   const [userData, setUserData] = useState(null);
   const [progressData, setProgressData] = useState(null);
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showMoodCheck, setShowMoodCheck] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -84,6 +88,27 @@ const DashboardPage = () => {
 
     fetchDashboardData();
   }, [getAccessTokenSilently, api, navigate]);
+
+  // MoodCheck: Show modal after dashboard loads
+  useEffect(() => {
+    if (!loading && userData && shouldShowMoodCheck()) {
+      // Delay slightly to let dashboard render first
+      const timer = setTimeout(() => {
+        setShowMoodCheck(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, userData, shouldShowMoodCheck]);
+
+  const handleMoodCheckResult = (result) => {
+    recordMoodCheck();
+    
+    if (!result.readyToLearn && !result.skipped) {
+      // User needs a refresh - redirect to refresh page
+      navigate('/refresh');
+    }
+    // If ready to learn or skipped, just close modal and stay on dashboard
+  };
 
   const handleLogout = () => {
     logout({
@@ -164,9 +189,17 @@ const DashboardPage = () => {
   const displayUser = userData || user;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-      {/* Modern Header with Glassmorphism */}
-      <header className="glass sticky top-0 z-50 border-b border-white/20">
+    <>
+      {/* MoodCheck Modal */}
+      <MoodCheckModal
+        isOpen={showMoodCheck}
+        onClose={() => setShowMoodCheck(false)}
+        onResult={handleMoodCheckResult}
+      />
+
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+        {/* Modern Header with Glassmorphism */}
+        <header className="glass sticky top-0 z-50 border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
@@ -345,7 +378,8 @@ const DashboardPage = () => {
           </div>
         </div>
       </main>
-    </div>
+      </div>
+    </>
   );
 };
 

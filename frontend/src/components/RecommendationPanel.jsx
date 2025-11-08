@@ -143,8 +143,7 @@ const RecommendationPanel = () => {
         {recommendations.recommendations.map((rec, index) => (
           <div
             key={index}
-            className="glass p-4 hover-lift cursor-pointer group border-l-4 border-transparent hover:border-primary-500 transition-all"
-            onClick={() => handleLessonClick(rec.lessonTitle)}
+            className="glass p-4 hover-lift group border-l-4 border-transparent hover:border-primary-500 transition-all"
           >
             <div className="flex items-start justify-between gap-3 mb-2">
               <h4 className="font-bold text-gray-900 flex-1 group-hover:text-gradient transition-all">
@@ -160,15 +159,20 @@ const RecommendationPanel = () => {
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p className="text-sm text-gray-600 leading-relaxed mb-3">
               {rec.reason}
             </p>
-            <div className="mt-3 flex items-center text-primary-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-              <span>Start Learning</span>
-              <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </div>
+            <button
+              onClick={() => handleLessonClick(rec.lessonTitle)}
+              className="btn-primary w-full text-sm py-2"
+            >
+              <span className="flex items-center justify-center gap-2">
+                Start Learning Now
+                <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
+            </button>
           </div>
         ))}
       </div>

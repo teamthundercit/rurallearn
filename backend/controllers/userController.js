@@ -25,6 +25,7 @@ export const handleAuthCallback = async (req, res) => {
           name: user.name,
           role: user.role,
           avatar: user.avatar,
+          preferences: user.preferences,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         }
@@ -59,6 +60,7 @@ export const getCurrentUser = async (req, res) => {
           name: user.name,
           role: user.role,
           avatar: user.avatar,
+          preferences: user.preferences,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         }
@@ -145,6 +147,7 @@ export const updateCurrentUser = async (req, res) => {
           name: user.name,
           role: user.role,
           avatar: user.avatar,
+          preferences: user.preferences,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         }
@@ -180,6 +183,85 @@ export const updateCurrentUser = async (req, res) => {
       error: {
         code: 'UPDATE_USER_ERROR',
         message: 'Failed to update user profile'
+      }
+    });
+  }
+};
+
+/**
+ * Update user preferences (onboarding)
+ */
+export const updateUserPreferences = async (req, res) => {
+  try {
+    const { learningGoals, difficultyLevel, topicsOfInterest } = req.body;
+
+    // Input validation
+    const errors = [];
+    
+    if (!learningGoals || !Array.isArray(learningGoals) || learningGoals.length === 0) {
+      errors.push('Learning goals must be a non-empty array');
+    }
+    
+    if (!difficultyLevel || !['beginner', 'intermediate', 'advanced'].includes(difficultyLevel)) {
+      errors.push('Difficulty level must be one of: beginner, intermediate, advanced');
+    }
+    
+    if (!topicsOfInterest || !Array.isArray(topicsOfInterest) || topicsOfInterest.length === 0) {
+      errors.push('Topics of interest must be a non-empty array');
+    }
+    
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid input data',
+          details: errors
+        }
+      });
+    }
+
+    const user = await userService.updateUserPreferences(req.user.auth0Id, {
+      learningGoals,
+      difficultyLevel,
+      topicsOfInterest
+    });
+
+    res.json({
+      success: true,
+      data: {
+        user: {
+          id: user._id,
+          auth0Id: user.auth0Id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          avatar: user.avatar,
+          preferences: user.preferences,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        }
+      },
+      message: 'Preferences saved successfully'
+    });
+  } catch (error) {
+    console.error('Error in updateUserPreferences:', error);
+    
+    if (error.message === 'User not found') {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'UPDATE_PREFERENCES_ERROR',
+        message: 'Failed to update user preferences'
       }
     });
   }

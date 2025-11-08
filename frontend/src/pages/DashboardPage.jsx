@@ -54,7 +54,15 @@ const DashboardPage = () => {
           getUserProgress(token)
         ]);
 
-        setUserData(userResponse.data?.user || userResponse.user);
+        const fetchedUser = userResponse.data?.user || userResponse.user;
+        setUserData(fetchedUser);
+
+        // Check if onboarding is completed
+        if (!fetchedUser.preferences?.onboardingCompleted) {
+          console.log('Onboarding not completed, redirecting...');
+          navigate('/onboarding');
+          return;
+        }
 
         // Handle progress data structure
         const progressInfo = progressResponse.data || progressResponse;
@@ -77,7 +85,7 @@ const DashboardPage = () => {
     };
 
     fetchDashboardData();
-  }, [getAccessTokenSilently, api]);
+  }, [getAccessTokenSilently, api, navigate]);
 
   const handleLogout = () => {
     logout({

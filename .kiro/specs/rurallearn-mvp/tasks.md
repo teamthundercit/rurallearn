@@ -276,13 +276,37 @@
     - Display progress indicators during data fetching
     - _Requirements: 7.4_
 
-- [x] 12. Final testing and polish
+- [x] 12. Implement onboarding quiz
+  - [x] 12.1 Add preferences field to User model
+    - Add onboardingCompleted, learningGoals, difficultyLevel, topicsOfInterest fields
+    - Update user service to handle preference updates
+    - _Requirements: 2.1, 4.2_
+  - [x] 12.2 Create onboarding API endpoint
+    - Implement POST /api/users/me/preferences endpoint
+    - Add input validation for preferences
+    - Update user controller with preference handler
+    - _Requirements: 2.1, 4.2_
+  - [x] 12.3 Build onboarding frontend
+    - Create OnboardingPage with 3-step wizard
+    - Implement learning goals selection (Step 1)
+    - Implement difficulty level selection (Step 2)
+    - Implement topics of interest selection (Step 3)
+    - Add progress indicator and navigation
+    - _Requirements: 2.1, 2.4, 7.1_
+  - [x] 12.4 Integrate onboarding into user flow
+    - Add onboarding route to App.jsx
+    - Update Dashboard to check onboarding completion
+    - Redirect new users to onboarding before dashboard
+    - Update AI service to use preferences in recommendations
+    - _Requirements: 2.1, 4.2, 4.3_
+
+- [x] 13. Final testing and polish
 
 
 
 
 
-  - [x] 12.1 End-to-end testing
+  - [x] 13.1 End-to-end testing
 
 
     - Verify complete user flow from signup to lesson completion
@@ -291,7 +315,7 @@
     - Test AI recommendations and chatbot interactions
     - Ensure progress tracking persists across sessions
     - _Requirements: All_
-  - [x] 12.2 Performance optimization
+  - [x] 13.2 Performance optimization
 
 
 
@@ -303,7 +327,7 @@
     - Optimize bundle size if needed
     - Test on low-spec devices
     - _Requirements: 7.3_
-  - [x] 12.3 Error handling verification
+  - [x] 13.3 Error handling verification
 
 
 

@@ -59,6 +59,19 @@ export const getUserProfile = async (token) => {
   }
 };
 
+export const updateUserPreferences = async (token, preferences) => {
+  try {
+    const response = await api.post('/api/users/me/preferences', preferences, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to update preferences');
+  }
+};
+
 // Progress API functions
 export const getUserProgress = async (token) => {
   try {

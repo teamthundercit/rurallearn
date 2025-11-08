@@ -3,11 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth0 } from '@auth0/auth0-react';
 import Auth0ProviderWithHistory from './components/Auth0ProviderWithHistory';
 import ProtectedRoute from './components/ProtectedRoute';
-import OfflineIndicator from './components/OfflineIndicator';
-import { useOfflineSync } from './utils/useOfflineSync';
+// Temporarily disabled for debugging
+// import OfflineIndicator from './components/OfflineIndicator';
+// import { useOfflineSync } from './utils/useOfflineSync';
 
 // Lazy load pages for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LessonsListPage = lazy(() => import('./pages/LessonsListPage'));
 const LessonPage = lazy(() => import('./pages/LessonPage'));
@@ -22,35 +24,31 @@ const LoadingSpinner = () => (
 );
 
 function AppContent() {
-  const { isAuthenticated, isLoading, getAccessTokenSilently } = useAuth0();
-  const [token, setToken] = React.useState(null);
+  const { isAuthenticated, isLoading } = useAuth0();
 
   // Check if we're handling an Auth0 callback
-  // Only show loading if we have the callback params AND we're not yet authenticated
   const isAuth0Callback = React.useMemo(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const hasCallbackParams = searchParams.has('code') && searchParams.has('state');
-    // Only consider it a callback if we have the params AND we're still loading or not authenticated
     return hasCallbackParams && (isLoading || !isAuthenticated);
   }, [isLoading, isAuthenticated]);
 
-  // Get token for offline sync
-  React.useEffect(() => {
-    const getToken = async () => {
-      if (isAuthenticated) {
-        try {
-          const accessToken = await getAccessTokenSilently();
-          setToken(accessToken);
-        } catch (error) {
-          console.error('Error getting token:', error);
-        }
-      }
-    };
-    getToken();
-  }, [isAuthenticated, getAccessTokenSilently]);
-
-  // IMPORTANT: Call all hooks before any conditional returns
-  const { isOnline, isSyncing, unsyncedCount } = useOfflineSync(token);
+  // Temporarily disabled offline sync for debugging
+  // const [token, setToken] = React.useState(null);
+  // React.useEffect(() => {
+  //   const getToken = async () => {
+  //     if (isAuthenticated) {
+  //       try {
+  //         const accessToken = await getAccessTokenSilently();
+  //         setToken(accessToken);
+  //       } catch (error) {
+  //         console.error('Error getting token:', error);
+  //       }
+  //     }
+  //   };
+  //   getToken();
+  // }, [isAuthenticated, getAccessTokenSilently]);
+  // const { isOnline, isSyncing, unsyncedCount } = useOfflineSync(token);
 
   // Debug logging
   React.useEffect(() => {
@@ -68,7 +66,7 @@ function AppContent() {
     console.log('Auth0 loading...');
     return <LoadingSpinner />;
   }
-  
+
   // If we have callback params but we're authenticated, Auth0 is done - let it through
   if (isAuth0Callback && !isAuthenticated) {
     console.log('Auth0 processing callback...');
@@ -82,6 +80,14 @@ function AppContent() {
           <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
           <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
           <Route path="/test-auth" element={<TestAuthPage />} />
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute>
+                <OnboardingPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
@@ -109,16 +115,12 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
 
-        {/* Show chatbot only when authenticated */}
-        {isAuthenticated && <ChatbotWidget />}
+        {/* Temporarily disabled chatbot for debugging */}
+        {/* {isAuthenticated && <ChatbotWidget />} */}
       </Suspense>
 
-      {/* Show offline indicator */}
-      <OfflineIndicator
-        isOnline={isOnline}
-        isSyncing={isSyncing}
-        unsyncedCount={unsyncedCount}
-      />
+      {/* Temporarily disabled offline indicator for debugging */}
+      {/* <OfflineIndicator isOnline={isOnline} isSyncing={isSyncing} unsyncedCount={unsyncedCount} /> */}
     </>
   );
 }

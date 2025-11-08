@@ -87,7 +87,7 @@ export const getUserById = async (userId) => {
  */
 export const updateUserProfile = async (auth0Id, updates) => {
   try {
-    const allowedUpdates = ['name', 'avatar'];
+    const allowedUpdates = ['name', 'avatar', 'preferences'];
     const filteredUpdates = {};
     
     // Only allow specific fields to be updated
@@ -110,6 +110,32 @@ export const updateUserProfile = async (auth0Id, updates) => {
     return user;
   } catch (error) {
     console.error('Error in updateUserProfile:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update user preferences (onboarding)
+ */
+export const updateUserPreferences = async (auth0Id, preferences) => {
+  try {
+    const user = await User.findOne({ auth0Id });
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    user.preferences = {
+      ...user.preferences,
+      ...preferences,
+      onboardingCompleted: true,
+      completedAt: new Date()
+    };
+
+    await user.save();
+    return user;
+  } catch (error) {
+    console.error('Error in updateUserPreferences:', error);
     throw error;
   }
 };

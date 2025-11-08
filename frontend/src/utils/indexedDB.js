@@ -213,7 +213,9 @@ export const getUnsyncedProgress = async () => {
     const index = store.index('synced');
 
     return new Promise((resolve, reject) => {
-      const request = index.getAll(false);
+      // Use IDBKeyRange for boolean index query
+      const keyRange = IDBKeyRange.only(false);
+      const request = index.getAll(keyRange);
       
       request.onsuccess = () => {
         resolve(request.result);
@@ -226,7 +228,8 @@ export const getUnsyncedProgress = async () => {
     });
   } catch (error) {
     console.error('Error in getUnsyncedProgress:', error);
-    throw error;
+    // Return empty array instead of throwing to prevent app crashes
+    return [];
   }
 };
 

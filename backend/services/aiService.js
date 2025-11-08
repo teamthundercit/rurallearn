@@ -1,15 +1,23 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import AIInteraction from '../models/AIInteraction.js';
 
+// Check if API key is configured
+if (!process.env.GEMINI_API_KEY) {
+  console.warn('⚠️  GEMINI_API_KEY not configured. AI features will use fallback mode.');
+  console.warn('   Get your API key at: https://aistudio.google.com/app/apikey');
+}
+
 // Initialize Gemini AI client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = process.env.GEMINI_API_KEY 
+  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+  : null;
 
 /**
  * Get Gemini AI model instance
- * @param {string} modelName - Model name (default: gemini-pro)
+ * @param {string} modelName - Model name (default: gemini-2.5-flash)
  * @returns {Object} Gemini model instance
  */
-export const getModel = (modelName = 'gemini-pro') => {
+export const getModel = (modelName = 'gemini-2.5-flash') => {
   return genAI.getGenerativeModel({ model: modelName });
 };
 
@@ -22,6 +30,11 @@ export const getModel = (modelName = 'gemini-pro') => {
  */
 export const generateRecommendations = async (user, progressData, allLessons) => {
   try {
+    // If no API key, skip to fallback
+    if (!genAI) {
+      throw new Error('Gemini API not configured');
+    }
+    
     const model = getModel();
 
     // Prepare user progress summary
@@ -36,6 +49,9 @@ export const generateRecommendations = async (user, progressData, allLessons) =>
     );
 
     // Build prompt for Gemini
+    const userPreferences = user.preferences || {};
+    const hasPreferences = userPreferences.onboardingCompleted;
+    
     const prompt = `You are an educational AI assistant for RuralLearn, a platform helping students in rural areas.
 
 User Profile:
@@ -43,6 +59,11 @@ User Profile:
 - Role: ${user.role}
 - Completed Lessons: ${completedLessons.length}
 - Average Quiz Score: ${averageScore.toFixed(1)}%
+${hasPreferences ? `
+User Preferences (from onboarding):
+- Learning Goals: ${userPreferences.learningGoals?.join(', ') || 'Not specified'}
+- Preferred Difficulty: ${userPreferences.difficultyLevel || 'Not specified'}
+- Topics of Interest: ${userPreferences.topicsOfInterest?.join(', ') || 'Not specified'}` : ''}
 
 Recent Progress:
 ${completedLessons.slice(-5).map(p => `- Lesson: ${p.lessonId.title || 'Unknown'}, Score: ${p.quizScore || 0}%`).join('\n')}
@@ -52,11 +73,11 @@ ${availableLessons.slice(0, 10).map((lesson, idx) =>
   `${idx + 1}. ${lesson.title} (${lesson.difficulty}) - ${lesson.description || 'No description'}`
 ).join('\n')}
 
-Based on the user's progress and performance, recommend 3-5 lessons from the available lessons that would be most beneficial for their learning journey. Consider:
+Based on the user's progress, performance${hasPreferences ? ', and stated preferences' : ''}, recommend 3-5 lessons from the available lessons that would be most beneficial for their learning journey. Consider:
 1. Their current skill level based on quiz scores
 2. Logical progression from completed lessons
-3. Difficulty level appropriate for their performance
-4. Variety in topics to maintain engagement
+3. Difficulty level appropriate for their performance${hasPreferences ? ' and preferences' : ''}
+4. Variety in topics to maintain engagement${hasPreferences ? '\n5. Alignment with their learning goals and interests' : ''}
 
 Provide your response in the following JSON format:
 {
@@ -109,7 +130,54 @@ Provide your response in the following JSON format:
     return recommendations;
   } catch (error) {
     console.error('Error generating recommendations:', error);
-    throw new Error('Failed to generate recommendations');
+    
+    // Fallback: Return rule-based recommendations if AI fails
+    console.log('Using fallback rule-based recommendations');
+    
+    const completedLessons = progressData.filter(p => p.status === 'completed');
+    const completedLessonIds = completedLessons.map(p => p.lessonId.toString());
+    const availableLessons = allLessons.filter(
+      lesson => !completedLessonIds.includes(lesson._id.toString())
+    );
+    
+    // Rule-based recommendation logic
+    const userPreferences = user.preferences || {};
+    const preferredDifficulty = userPreferences.difficultyLevel || 'beginner';
+    const topicsOfInterest = userPreferences.topicsOfInterest || [];
+    
+    // Filter and sort lessons
+    let recommendedLessons = availableLessons
+      .filter(lesson => {
+        // Match difficulty level
+        if (lesson.difficulty === preferredDifficulty) return true;
+        // Or allow one level up if user has completed lessons
+        if (completedLessons.length > 3) {
+          if (preferredDifficulty === 'beginner' && lesson.difficulty === 'intermediate') return true;
+          if (preferredDifficulty === 'intermediate' && lesson.difficulty === 'advanced') return true;
+        }
+        return false;
+      })
+      .slice(0, 5);
+    
+    // If not enough lessons, add more from available
+    if (recommendedLessons.length < 3) {
+      recommendedLessons = availableLessons.slice(0, 5);
+    }
+    
+    const fallbackRecommendations = {
+      recommendations: recommendedLessons.map((lesson, idx) => ({
+        lessonTitle: lesson.title,
+        reason: idx === 0 
+          ? 'Great next step based on your preferences' 
+          : 'Recommended to expand your knowledge',
+        priority: idx === 0 ? 'high' : 'medium'
+      })),
+      overallGuidance: completedLessons.length > 0
+        ? `Great progress! You've completed ${completedLessons.length} lesson${completedLessons.length > 1 ? 's' : ''}. Keep up the excellent work!`
+        : 'Welcome! Start your learning journey with these recommended lessons.'
+    };
+    
+    return fallbackRecommendations;
   }
 };
 

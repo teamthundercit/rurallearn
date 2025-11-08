@@ -2,8 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { logPerformanceMetrics } from './reportWebVitals';
-import * as serviceWorkerRegistration from './utils/serviceWorkerRegistration';
+// Temporarily disabled for debugging
+// import { logPerformanceMetrics } from './reportWebVitals';
+// import * as serviceWorkerRegistration from './utils/serviceWorkerRegistration';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -12,15 +13,15 @@ root.render(
   </React.StrictMode>
 );
 
-// Register service worker for offline functionality
-serviceWorkerRegistration.register({
-  onSuccess: () => {
-    console.log('Content cached for offline use.');
-  },
-  onUpdate: (registration) => {
-    console.log('New content available; please refresh.');
-  }
-});
+// Temporarily disabled service worker for debugging
+// serviceWorkerRegistration.register({
+//   onSuccess: () => {
+//     console.log('Content cached for offline use.');
+//   },
+//   onUpdate: (registration) => {
+//     console.log('New content available; please refresh.');
+//   }
+// });
 
-// Measure and log performance metrics
-logPerformanceMetrics();
+// Temporarily disabled performance monitoring for debugging
+// logPerformanceMetrics();

@@ -27,6 +27,27 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: null
+  },
+  preferences: {
+    onboardingCompleted: {
+      type: Boolean,
+      default: false
+    },
+    learningGoals: [{
+      type: String
+    }],
+    difficultyLevel: {
+      type: String,
+      enum: ['beginner', 'intermediate', 'advanced'],
+      default: 'beginner'
+    },
+    topicsOfInterest: [{
+      type: String
+    }],
+    completedAt: {
+      type: Date,
+      default: null
+    }
   }
 }, {
   timestamps: true

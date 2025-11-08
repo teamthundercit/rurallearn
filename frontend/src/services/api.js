@@ -44,4 +44,32 @@ api.interceptors.response.use(
   }
 );
 
+// User API functions
+export const getUserProfile = async (token) => {
+  try {
+    const response = await api.get('/api/users/me', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to fetch user profile');
+  }
+};
+
+// Progress API functions
+export const getUserProgress = async (token) => {
+  try {
+    const response = await api.get('/api/progress', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to fetch user progress');
+  }
+};
+
 export default api;

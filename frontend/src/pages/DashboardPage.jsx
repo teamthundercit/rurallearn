@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useNavigate } from 'react-router-dom';
 import useApi from '../utils/useApi';
+import { getUserProfile, getUserProgress } from '../services/api';
+import ProgressCard from '../components/ProgressCard';
 
 const DashboardPage = () => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
+  const navigate = useNavigate();
   const api = useApi();
   const [userData, setUserData] = useState(null);
+  const [progressData, setProgressData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const syncUser = async () => {
+    const fetchDashboardData = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -24,29 +29,29 @@ const DashboardPage = () => {
         });
 
         // Sync user with backend
-        const callbackResponse = await api.post('/api/auth/callback', {}, {
+        await api.post('/api/auth/callback', {}, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
 
-        // Get user profile
-        const userResponse = await api.get('/api/users/me', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        // Fetch user profile and progress data
+        const [userResponse, progressResponse] = await Promise.all([
+          getUserProfile(token),
+          getUserProgress(token)
+        ]);
 
-        setUserData(userResponse.data.data.user);
+        setUserData(userResponse.data?.user || userResponse.user);
+        setProgressData(progressResponse.data?.progress || progressResponse.progress || []);
       } catch (err) {
-        console.error('Error syncing user:', err);
-        setError('Failed to load user data');
+        console.error('Error loading dashboard data:', err);
+        setError(err.message || 'Failed to load dashboard data. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    syncUser();
+    fetchDashboardData();
   }, [getAccessTokenSilently, api]);
 
   const handleLogout = () => {
@@ -85,6 +90,36 @@ const DashboardPage = () => {
     );
   }
 
+  // Calculate progress metrics
+  const calculateMetrics = () => {
+    if (!progressData || progressData.length === 0) {
+      return {
+        completedLessons: 0,
+        averageScore: 0,
+        totalTimeSpent: 0
+      };
+    }
+
+    const completedLessons = progressData.filter(p => p.status === 'completed').length;
+    
+    const quizScores = progressData
+      .filter(p => p.quizScore !== null && p.quizScore !== undefined)
+      .map(p => p.quizScore);
+    
+    const averageScore = quizScores.length > 0
+      ? Math.round(quizScores.reduce((sum, score) => sum + score, 0) / quizScores.length)
+      : 0;
+    
+    const totalTimeSpent = progressData.reduce((sum, p) => sum + (p.timeSpent || 0), 0);
+
+    return {
+      completedLessons,
+      averageScore,
+      totalTimeSpent
+    };
+  };
+
+  const metrics = calculateMetrics();
   const displayUser = userData || user;
 
   return (
@@ -133,58 +168,79 @@ const DashboardPage = () => {
           </p>
         </div>
 
-        {/* Placeholder content */}
+        {/* Progress Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="text-primary-600 text-3xl mb-2">📚</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              Lessons Completed
-            </h3>
-            <p className="text-3xl font-bold text-primary-600">0</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="text-secondary-600 text-3xl mb-2">🎯</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              Average Score
-            </h3>
-            <p className="text-3xl font-bold text-secondary-600">0%</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="text-accent-600 text-3xl mb-2">⏱️</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              Time Spent
-            </h3>
-            <p className="text-3xl font-bold text-accent-600">0h</p>
-          </div>
+          <ProgressCard
+            icon="📚"
+            title="Lessons Completed"
+            value={metrics.completedLessons}
+            color="primary"
+          />
+          <ProgressCard
+            icon="🎯"
+            title="Average Score"
+            value={`${metrics.averageScore}%`}
+            color="secondary"
+          />
+          <ProgressCard
+            icon="⏱️"
+            title="Time Spent"
+            value={`${Math.round(metrics.totalTimeSpent)}m`}
+            color="accent"
+          />
         </div>
 
+        {/* Recent Progress Section */}
+        {progressData && progressData.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              Recent Progress
+            </h3>
+            <div className="space-y-3">
+              {progressData.slice(0, 5).map((progress, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">
+                      Lesson {progress.lessonId}
+                    </p>
+                    <p className="text-sm text-gray-600 capitalize">
+                      Status: {progress.status}
+                    </p>
+                  </div>
+                  {progress.quizScore !== null && progress.quizScore !== undefined && (
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-primary-600">
+                        {progress.quizScore}%
+                      </p>
+                      <p className="text-xs text-gray-500">Quiz Score</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Call to Action */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">
-            Getting Started
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Your dashboard is ready! The following features will be available soon:
-          </p>
-          <ul className="space-y-2 text-gray-600">
-            <li className="flex items-center">
-              <span className="text-green-500 mr-2">✓</span>
-              Authentication with Auth0
-            </li>
-            <li className="flex items-center">
-              <span className="text-gray-400 mr-2">○</span>
-              Browse and view lessons
-            </li>
-            <li className="flex items-center">
-              <span className="text-gray-400 mr-2">○</span>
-              Take quizzes and track progress
-            </li>
-            <li className="flex items-center">
-              <span className="text-gray-400 mr-2">○</span>
-              Get AI-powered recommendations
-            </li>
-          </ul>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Ready to Learn?
+              </h3>
+              <p className="text-gray-600">
+                {progressData && progressData.length > 0
+                  ? 'Continue your learning journey with new lessons'
+                  : 'Start your learning journey by exploring available lessons'}
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/lessons')}
+              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            >
+              Browse Lessons
+            </button>
+          </div>
         </div>
       </main>
     </div>

@@ -48,6 +48,22 @@ const userSchema = new mongoose.Schema({
       type: Date,
       default: null
     }
+  },
+  gamification: {
+    streak: {
+      current: { type: Number, default: 0 },
+      longest: { type: Number, default: 0 },
+      lastActivityDate: { type: Date, default: null }
+    },
+    badges: [{
+      id: String,
+      name: String,
+      icon: String,
+      earnedAt: Date
+    }],
+    totalPoints: { type: Number, default: 0 },
+    weeklyGoal: { type: Number, default: 3 },
+    monthlyGoal: { type: Number, default: 12 }
   }
 }, {
   timestamps: true

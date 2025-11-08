@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import AIInteraction from '../models/AIInteraction.js';
 import tfRecommendationService from './tfRecommendationService.js';
+import * as adaptiveLearningService from './adaptiveLearningService.js';
 
 // Lazy initialization of Gemini AI client
 let genAI = null;
@@ -174,50 +175,59 @@ Provide your response in the following JSON format:
       console.log('→ Using rule-based recommendations');
     }
     
-    // Final fallback: Rule-based recommendations
+    // Final fallback: Adaptive rule-based recommendations
     const completedLessons = progressData.filter(p => p.status === 'completed');
     const completedLessonIds = completedLessons.map(p => p.lessonId.toString());
-    const availableLessons = allLessons.filter(
-      lesson => !completedLessonIds.includes(lesson._id.toString())
+    
+    // Analyze student performance for adaptive learning
+    const performance = adaptiveLearningService.analyzePerformance(progressData);
+    
+    // Get adaptive recommendations
+    const recommendedLessons = adaptiveLearningService.getAdaptiveRecommendations(
+      performance,
+      allLessons,
+      completedLessonIds
     );
     
-    // Rule-based recommendation logic
-    const userPreferences = user.preferences || {};
-    const preferredDifficulty = userPreferences.difficultyLevel || 'beginner';
+    // Generate personalized feedback
+    const feedback = adaptiveLearningService.generateFeedback(performance);
     
-    // Filter and sort lessons
-    let recommendedLessons = availableLessons
-      .filter(lesson => {
-        // Match difficulty level
-        if (lesson.difficulty === preferredDifficulty) return true;
-        // Or allow one level up if user has completed lessons
-        if (completedLessons.length > 3) {
-          if (preferredDifficulty === 'beginner' && lesson.difficulty === 'intermediate') return true;
-          if (preferredDifficulty === 'intermediate' && lesson.difficulty === 'advanced') return true;
+    // Check if student should advance
+    const advancement = adaptiveLearningService.shouldAdvance(performance);
+    
+    // Build recommendations with adaptive reasoning
+    const adaptiveRecommendations = {
+      recommendations: recommendedLessons.map((lesson, idx) => {
+        let reason = '';
+        
+        if (lesson.difficulty === performance.recommendedDifficulty) {
+          reason = `Perfect match for your ${performance.level} level (${performance.averageScore}% avg)`;
+        } else if (lesson.difficulty === 'beginner' && performance.weaknesses.includes('beginner')) {
+          reason = 'Strengthen your fundamentals with this lesson';
+        } else if (advancement.shouldAdvance && lesson.difficulty === advancement.nextLevel) {
+          reason = 'Ready to level up? Try this challenge!';
+        } else {
+          reason = 'Recommended to expand your knowledge';
         }
-        return false;
-      })
-      .slice(0, 5);
-    
-    // If not enough lessons, add more from available
-    if (recommendedLessons.length < 3) {
-      recommendedLessons = availableLessons.slice(0, 5);
-    }
-    
-    const fallbackRecommendations = {
-      recommendations: recommendedLessons.map((lesson, idx) => ({
-        lessonTitle: lesson.title,
-        reason: idx === 0 
-          ? 'Great next step based on your preferences' 
-          : 'Recommended to expand your knowledge',
-        priority: idx === 0 ? 'high' : 'medium'
-      })),
-      overallGuidance: completedLessons.length > 0
-        ? `Great progress! You've completed ${completedLessons.length} lesson${completedLessons.length > 1 ? 's' : ''}. Keep up the excellent work!`
-        : 'Welcome! Start your learning journey with these recommended lessons.'
+        
+        return {
+          lessonTitle: lesson.title,
+          reason,
+          priority: idx === 0 ? 'high' : idx === 1 ? 'medium' : 'low'
+        };
+      }),
+      overallGuidance: feedback,
+      adaptiveInsights: {
+        currentLevel: performance.level,
+        averageScore: performance.averageScore,
+        learningPace: performance.pace,
+        recommendedDifficulty: performance.recommendedDifficulty,
+        canAdvance: advancement.shouldAdvance,
+        advancementMessage: advancement.reason
+      }
     };
     
-    return fallbackRecommendations;
+    return adaptiveRecommendations;
   }
 };
 

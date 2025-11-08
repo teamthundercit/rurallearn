@@ -241,4 +241,18 @@ export const sendChatMessage = async (token, message, conversationHistory = []) 
   }
 };
 
+// Gamification API functions
+export const getLeaderboard = async (token, timeframe = 'week') => {
+  try {
+    const response = await api.get(`/api/progress/leaderboard?timeframe=${timeframe}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to fetch leaderboard');
+  }
+};
+
 export default api;

@@ -124,10 +124,10 @@ const LessonPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading lesson...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+        <div className="text-center animate-scale-in">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200 border-t-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium text-lg">Loading lesson...</p>
         </div>
       </div>
     );
@@ -135,20 +135,42 @@ const LessonPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-700 mb-4">{error}</p>
-          <div className="flex space-x-4 justify-center">
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Retry
-            </button>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+        <div className="card-gradient max-w-md animate-scale-in">
+          <div className="text-center">
+            <span className="text-6xl mb-4 block">⚠️</span>
+            <h2 className="text-2xl font-display font-bold text-red-600 mb-4">Error</h2>
+            <p className="text-gray-700 mb-6">{error}</p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => window.location.reload()}
+                className="btn-primary"
+              >
+                Retry
+              </button>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="btn-secondary"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!lesson) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+        <div className="card-gradient animate-scale-in">
+          <div className="text-center">
+            <span className="text-6xl mb-4 block">📚</span>
+            <h2 className="text-2xl font-display font-bold text-gray-900 mb-4">Lesson Not Found</h2>
             <button
               onClick={() => navigate('/dashboard')}
-              className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              className="btn-primary"
             >
               Back to Dashboard
             </button>
@@ -158,24 +180,8 @@ const LessonPage = () => {
     );
   }
 
-  if (!lesson) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Lesson Not Found</h2>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
       {/* Toast Notification */}
       {toast && (
         <Toast
@@ -185,18 +191,25 @@ const LessonPage = () => {
         />
       )}
       
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+      {/* Modern Header */}
+      <header className="glass sticky top-0 z-50 border-b border-white/20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-all group"
             >
-              <span className="text-xl mr-2">←</span>
-              <span className="font-medium">Back to Dashboard</span>
+              <svg className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="font-semibold">Back</span>
             </button>
-            <h1 className="text-xl font-bold text-primary-600">RuralLearn</h1>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-xl">🎓</span>
+              </div>
+              <h1 className="text-xl font-display font-black text-gradient">RuralLearn</h1>
+            </div>
           </div>
         </div>
       </header>
@@ -204,40 +217,41 @@ const LessonPage = () => {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8" ref={lessonContentRef}>
         {/* Lesson Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-2 mb-3">
+        <div className="mb-8 animate-slide-down">
+          <div className="flex items-center flex-wrap gap-2 mb-4">
             {lesson.difficulty && (
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                lesson.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
-                lesson.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
+              <span className={`badge ${
+                lesson.difficulty === 'beginner' ? 'bg-success-100 text-success-800 border-success-200' :
+                lesson.difficulty === 'intermediate' ? 'bg-accent-100 text-accent-800 border-accent-200' :
+                'bg-red-100 text-red-800 border-red-200'
               }`}>
-                {lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1)}
+                {lesson.difficulty === 'beginner' ? '🌱' : lesson.difficulty === 'intermediate' ? '🌿' : '🌳'}
+                {' '}{lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1)}
               </span>
             )}
             {lesson.tags && lesson.tags.map((tag, index) => (
               <span
                 key={index}
-                className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                className="badge badge-primary"
               >
-                {tag}
+                #{tag}
               </span>
             ))}
           </div>
           
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-display font-black text-gray-900 mb-4">
             {lesson.title}
           </h1>
           
           {lesson.description && (
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 leading-relaxed">
               {lesson.description}
             </p>
           )}
         </div>
 
         {/* Lesson Content */}
-        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
+        <div className="card-gradient p-8 mb-8 animate-scale-in">
           {/* Video Content */}
           {lesson.content?.type === 'video' && lesson.content?.videoUrl && (
             <div className="mb-8">
@@ -258,13 +272,16 @@ const LessonPage = () => {
             </div>
           )}
 
-          {/* Text Content */}
+          {/* Text Content - Fixed rendering issue */}
           {(lesson.content?.type === 'text' || lesson.content?.type === 'mixed') && lesson.content?.text && (
-            <div className="prose max-w-none">
-              <div
-                className="text-gray-800 leading-relaxed whitespace-pre-wrap"
-                dangerouslySetInnerHTML={{ __html: lesson.content.text.replace(/\n/g, '<br />') }}
-              />
+            <div className="prose prose-lg max-w-none">
+              <div className="text-gray-800 leading-relaxed">
+                {lesson.content.text.split('\n').map((paragraph, index) => (
+                  <p key={index} className="mb-4">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
             </div>
           )}
 
@@ -273,11 +290,16 @@ const LessonPage = () => {
             <div className="mt-8 pt-8 border-t border-gray-200">
               <button
                 onClick={handleCompleteLesson}
-                className="w-full bg-primary-600 text-white px-6 py-4 rounded-lg hover:bg-primary-700 transition-colors font-medium text-lg"
+                className="btn-primary w-full text-lg group"
               >
-                {lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0
-                  ? 'Complete Lesson & Take Quiz'
-                  : 'Complete Lesson'}
+                <span className="flex items-center justify-center gap-2">
+                  {lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0
+                    ? 'Complete Lesson & Take Quiz'
+                    : 'Complete Lesson'}
+                  <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
               </button>
             </div>
           )}
@@ -285,7 +307,7 @@ const LessonPage = () => {
 
         {/* Quiz Section */}
         {showQuiz && lesson.quiz && (
-          <div className="mb-8">
+          <div className="mb-8 animate-slide-up">
             <QuizComponent
               quiz={lesson.quiz}
               onSubmit={handleQuizSubmit}
@@ -296,9 +318,14 @@ const LessonPage = () => {
               <div className="mt-6 text-center">
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                  className="btn-primary text-lg"
                 >
-                  Return to Dashboard
+                  <span className="flex items-center gap-2">
+                    Return to Dashboard
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                  </span>
                 </button>
               </div>
             )}

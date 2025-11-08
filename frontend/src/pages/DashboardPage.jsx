@@ -2,9 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
 import useApi from '../utils/useApi';
-import { getUserProfile, getUserProgress } from '../services/api';
+import { getUserProfile, getUserProgress, getLeaderboard } from '../services/api';
 import ProgressCard from '../components/ProgressCard';
 import RecommendationPanel from '../components/RecommendationPanel';
+import LearningStreak from '../components/LearningStreak';
+import AchievementBadges from '../components/AchievementBadges';
+import WeeklyActivityChart from '../components/WeeklyActivityChart';
+import QuickActions from '../components/QuickActions';
+import LearningGoalsProgress from '../components/LearningGoalsProgress';
+import RecentAchievements from '../components/RecentAchievements';
+import StudyReminders from '../components/StudyReminders';
+import Leaderboard from '../components/Leaderboard';
 
 const DashboardPage = () => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
@@ -12,6 +20,7 @@ const DashboardPage = () => {
   const api = useApi();
   const [userData, setUserData] = useState(null);
   const [progressData, setProgressData] = useState(null);
+  const [leaderboardData, setLeaderboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -35,10 +44,14 @@ const DashboardPage = () => {
           }
         });
 
-        // Fetch user profile and progress data
-        const [userResponse, progressResponse] = await Promise.all([
+        // Fetch user profile, progress data, and leaderboard
+        const [userResponse, progressResponse, leaderboardResponse] = await Promise.all([
           getUserProfile(token),
-          getUserProgress(token)
+          getUserProgress(token),
+          getLeaderboard(token, 'week').catch(err => {
+            console.warn('Failed to fetch leaderboard:', err);
+            return null;
+          })
         ]);
 
         const fetchedUser = userResponse.data?.user || userResponse.user;
@@ -52,10 +65,12 @@ const DashboardPage = () => {
 
         // Handle progress data structure
         const progressInfo = progressResponse.data || progressResponse;
-        setProgressData({
-          progress: progressInfo.progress || [],
-          summary: progressInfo.summary || null
-        });
+        setProgressData(progressInfo);
+        
+        // Handle leaderboard data
+        if (leaderboardResponse?.data) {
+          setLeaderboardData(leaderboardResponse.data);
+        }
       } catch (err) {
         console.error('Dashboard error:', err.message);
         setError(err.response?.data?.error?.message || err.message || 'Failed to load dashboard data. Please try again.');
@@ -146,34 +161,50 @@ const DashboardPage = () => {
   const displayUser = userData || user;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+      {/* Modern Header with Glassmorphism */}
+      <header className="glass sticky top-0 z-50 border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-primary-600">RuralLearn</h1>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{displayUser?.name}</p>
-                <p className="text-xs text-gray-500">{displayUser?.email}</p>
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-xl">🎓</span>
+              </div>
+              <h1 className="text-2xl font-display font-black text-gradient">RuralLearn</h1>
+            </div>
+            
+            {/* User Profile */}
+            <div className="flex items-center gap-4">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-gray-900">{displayUser?.name}</p>
+                <p className="text-xs text-gray-600">{displayUser?.email}</p>
                 {userData?.role && (
-                  <p className="text-xs text-primary-600 font-medium capitalize">
+                  <span className="badge-primary text-xs mt-1 inline-block">
                     {userData.role}
-                  </p>
+                  </span>
                 )}
               </div>
+              
               {(user?.picture || displayUser?.avatar) && (
-                <img
-                  src={user?.picture || displayUser?.avatar}
-                  alt={displayUser?.name}
-                  className="h-10 w-10 rounded-full"
-                />
+                <div className="relative">
+                  <img
+                    src={user?.picture || displayUser?.avatar}
+                    alt={displayUser?.name}
+                    className="h-12 w-12 rounded-full ring-4 ring-primary-100 hover:ring-primary-200 transition-all cursor-pointer"
+                  />
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-success-500 rounded-full border-2 border-white"></div>
+                </div>
               )}
+              
               <button
                 onClick={handleLogout}
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                className="btn-secondary text-sm px-4 py-2"
               >
-                Logout
+                <span className="hidden sm:inline">Logout</span>
+                <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
               </button>
             </div>
           </div>
@@ -182,108 +213,114 @@ const DashboardPage = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {displayUser?.name?.split(' ')[0]}!
+        {/* Welcome Section with Animation */}
+        <div className="mb-8 animate-slide-down">
+          <h2 className="text-4xl sm:text-5xl font-display font-black mb-3">
+            <span className="text-gray-900">Welcome back, </span>
+            <span className="text-gradient-animate">{displayUser?.name?.split(' ')[0]}!</span>
+            <span className="inline-block animate-bounce-slow ml-2">👋</span>
           </h2>
-          <p className="text-gray-600">
-            Continue your learning journey
+          <p className="text-gray-600 text-lg">
+            Continue your learning journey and achieve your goals
           </p>
         </div>
 
-        {/* Progress Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Progress Cards with Animation */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-scale-in">
           <ProgressCard
             icon="📚"
             title="Lessons Completed"
             value={metrics.completedLessons}
             color="primary"
+            trend={5}
           />
           <ProgressCard
             icon="🎯"
             title="Average Score"
             value={`${metrics.averageScore}%`}
-            color="secondary"
+            color="success"
+            trend={metrics.averageScore > 70 ? 3 : -2}
           />
           <ProgressCard
             icon="⏱️"
             title="Time Spent"
             value={`${Math.round(metrics.totalTimeSpent)}m`}
             color="accent"
+            trend={8}
           />
         </div>
 
-        {/* AI Recommendations Section */}
+        {/* Enhanced Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* AI Recommendations */}
+            <RecommendationPanel />
+            
+            {/* Weekly Activity Chart */}
+            <WeeklyActivityChart weeklyData={progressData?.weeklyActivity} />
+            
+            {/* Recent Achievements */}
+            <RecentAchievements achievements={progressData?.recentAchievements} />
+          </div>
+          
+          {/* Right Column */}
+          <div className="space-y-8">
+            {/* Learning Streak */}
+            <LearningStreak streak={userData?.gamification?.streak} />
+            
+            {/* Achievement Badges */}
+            <AchievementBadges 
+              badges={userData?.gamification?.badges} 
+              totalPoints={userData?.gamification?.totalPoints}
+            />
+            
+            {/* Quick Actions */}
+            <QuickActions 
+              lastLesson={progressData?.lastLesson}
+              failedQuizzes={progressData?.failedQuizzes}
+              recommendations={progressData?.recommendations}
+            />
+          </div>
+        </div>
+        
+        {/* Second Row - Full Width Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Learning Goals Progress */}
+          <LearningGoalsProgress 
+            weeklyGoal={userData?.gamification?.weeklyGoal}
+            monthlyGoal={userData?.gamification?.monthlyGoal}
+            weeklyProgress={progressData?.weeklyProgress}
+            monthlyProgress={progressData?.monthlyProgress}
+          />
+          
+          {/* Study Reminders */}
+          <StudyReminders 
+            nextLessons={progressData?.nextLessons}
+            reviewLessons={progressData?.reviewLessons}
+          />
+        </div>
+        
+        {/* Third Row - Leaderboard */}
         <div className="mb-8">
-          <RecommendationPanel />
+          <Leaderboard 
+            userRank={leaderboardData?.userRank || progressData?.userRank}
+            userPoints={userData?.gamification?.totalPoints}
+            topLearners={leaderboardData?.topLearners || progressData?.topLearners}
+          />
         </div>
 
-        {/* Recent Progress Section */}
-        {progressData?.progress && progressData.progress.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Recent Progress
-            </h3>
-            <div className="space-y-3">
-              {progressData.progress.slice(0, 5).map((progress, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/lessons/${progress.lessonId?._id || progress.lessonId}`)}
-                >
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">
-                      {progress.lessonId?.title || `Lesson ${progress.lessonId}`}
-                    </p>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${progress.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        progress.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                        {progress.status.replace('_', ' ')}
-                      </span>
-                      {progress.lessonId?.difficulty && (
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${progress.lessonId.difficulty === 'beginner' ? 'bg-blue-100 text-blue-800' :
-                          progress.lessonId.difficulty === 'intermediate' ? 'bg-purple-100 text-purple-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                          {progress.lessonId.difficulty}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    {progress.timeSpent > 0 && (
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-700">
-                          {Math.round(progress.timeSpent)}m
-                        </p>
-                        <p className="text-xs text-gray-500">Time Spent</p>
-                      </div>
-                    )}
-                    {progress.quizScore !== null && progress.quizScore !== undefined && (
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-primary-600">
-                          {progress.quizScore}%
-                        </p>
-                        <p className="text-xs text-gray-500">Quiz Score</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Call to Action */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Ready to Learn?
+        {/* Call to Action with Gradient */}
+        <div className="card-gradient p-8 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-secondary-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex-1">
+              <h3 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <span>Ready to Learn?</span>
+                <span className="text-3xl animate-bounce-slow">🚀</span>
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 text-lg">
                 {progressData?.progress && progressData.progress.length > 0
                   ? 'Continue your learning journey with new lessons'
                   : 'Start your learning journey by exploring available lessons'}
@@ -291,9 +328,14 @@ const DashboardPage = () => {
             </div>
             <button
               onClick={() => navigate('/lessons')}
-              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+              className="btn-primary text-lg group/btn whitespace-nowrap"
             >
-              Browse Lessons
+              <span className="flex items-center gap-2">
+                Browse Lessons
+                <svg className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
             </button>
           </div>
         </div>

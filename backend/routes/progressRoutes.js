@@ -17,4 +17,7 @@ router.post('/lesson/:id', progressController.recordLessonCompletion);
 // POST /api/progress/quiz/:id - Submit quiz answers
 router.post('/quiz/:id', progressController.submitQuiz);
 
+// GET /api/progress/leaderboard - Get leaderboard
+router.get('/leaderboard', progressController.getLeaderboard);
+
 export default router;

@@ -91,31 +91,39 @@ const LessonsListPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+      {/* Modern Header */}
+      <header className="glass sticky top-0 z-50 border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-all group"
             >
-              <span className="text-xl mr-2">←</span>
-              <span className="font-medium">Back to Dashboard</span>
+              <svg className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="font-semibold">Back to Dashboard</span>
             </button>
-            <h1 className="text-2xl font-bold text-primary-600">RuralLearn</h1>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-xl">🎓</span>
+              </div>
+              <h1 className="text-2xl font-display font-black text-gradient">RuralLearn</h1>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Browse Lessons
+        <div className="mb-8 animate-slide-down">
+          <h2 className="text-4xl sm:text-5xl font-display font-black mb-3">
+            <span className="text-gradient-animate">Browse Lessons</span>
+            <span className="inline-block animate-bounce-slow ml-2">📚</span>
           </h2>
-          <p className="text-gray-600">
-            Choose a lesson to start learning
+          <p className="text-gray-600 text-lg">
+            Discover your next learning adventure
           </p>
         </div>
 
@@ -180,44 +188,50 @@ const LessonsListPage = () => {
           </div>
         )}
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+        {/* Modern Filters */}
+        <div className="card-gradient p-6 mb-8 animate-scale-in">
+          <div className="flex items-center gap-2 mb-4">
+            <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            <h3 className="text-xl font-display font-bold text-gray-900">Filters</h3>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Difficulty
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Difficulty Level
               </label>
               <select
                 value={filters.difficulty}
                 onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="input-modern"
               >
                 <option value="">All Levels</option>
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
+                <option value="beginner">🌱 Beginner</option>
+                <option value="intermediate">🌿 Intermediate</option>
+                <option value="advanced">🌳 Advanced</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tags
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Search Tags
               </label>
               <input
                 type="text"
                 value={filters.tags}
                 onChange={(e) => setFilters({ ...filters, tags: e.target.value })}
-                placeholder="Enter tags (comma-separated)"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="e.g., programming, math..."
+                className="input-modern"
               />
             </div>
           </div>
         </div>
 
-        {/* Lessons Grid */}
+        {/* Lessons Grid with Modern Cards */}
         {lessons.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow-md">
-            <p className="text-gray-600 text-lg">No lessons available</p>
+          <div className="card-gradient text-center py-16">
+            <span className="text-6xl mb-4 block">📚</span>
+            <p className="text-gray-600 text-lg font-medium">No lessons available</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -225,33 +239,34 @@ const LessonsListPage = () => {
               <div
                 key={lesson._id}
                 onClick={() => handleLessonClick(lesson._id)}
-                className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                className="card-gradient hover-lift cursor-pointer group overflow-hidden"
               >
                 <div className="p-6">
-                  <div className="flex items-center space-x-2 mb-3">
+                  <div className="flex items-center flex-wrap gap-2 mb-3">
                     {lesson.difficulty && (
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        lesson.difficulty === 'beginner' ? 'bg-green-100 text-green-800' :
-                        lesson.difficulty === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
+                      <span className={`badge ${
+                        lesson.difficulty === 'beginner' ? 'bg-success-100 text-success-800 border-success-200' :
+                        lesson.difficulty === 'intermediate' ? 'bg-accent-100 text-accent-800 border-accent-200' :
+                        'bg-red-100 text-red-800 border-red-200'
                       }`}>
-                        {lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1)}
+                        {lesson.difficulty === 'beginner' ? '🌱' : lesson.difficulty === 'intermediate' ? '🌿' : '🌳'}
+                        {' '}{lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1)}
                       </span>
                     )}
                     {lesson.content?.type && (
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="badge badge-primary">
                         {lesson.content.type === 'video' ? '🎥 Video' :
                          lesson.content.type === 'mixed' ? '📚 Mixed' : '📄 Text'}
                       </span>
                     )}
                   </div>
                   
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-gradient transition-all">
                     {lesson.title}
                   </h3>
                   
                   {lesson.description && (
-                    <p className="text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-gray-600 mb-4 line-clamp-3 text-sm leading-relaxed">
                       {lesson.description}
                     </p>
                   )}
@@ -261,23 +276,28 @@ const LessonsListPage = () => {
                       {lesson.tags.slice(0, 3).map((tag, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-700"
+                          className="px-2 py-1 rounded-lg text-xs bg-gray-100 text-gray-700 hover:bg-primary-100 hover:text-primary-700 transition-colors"
                         >
-                          {tag}
+                          #{tag}
                         </span>
                       ))}
                       {lesson.tags.length > 3 && (
-                        <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-700">
-                          +{lesson.tags.length - 3} more
+                        <span className="px-2 py-1 rounded-lg text-xs bg-gray-100 text-gray-700">
+                          +{lesson.tags.length - 3}
                         </span>
                       )}
                     </div>
                   )}
                   
                   <button
-                    className="w-full bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                    className="btn-primary w-full group/btn"
                   >
-                    Start Lesson
+                    <span className="flex items-center justify-center gap-2">
+                      Start Lesson
+                      <svg className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
                   </button>
                 </div>
               </div>

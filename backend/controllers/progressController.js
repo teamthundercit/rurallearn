@@ -1,21 +1,90 @@
 import * as progressService from '../services/progressService.js';
+import * as gamificationService from '../services/gamificationService.js';
+import Progress from '../models/Progress.js';
+import User from '../models/User.js';
 
 /**
- * Get user's progress records
+ * Get user's progress records with gamification data
  * GET /api/progress
  */
 export const getUserProgress = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const auth0Id = req.auth.payload.sub;
+    
+    // Find user in database
+    const user = await User.findOne({ auth0Id });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+    
+    const userId = user._id;
     
     const progressRecords = await progressService.getProgress(userId);
     const summary = await progressService.getProgressSummary(userId);
+    
+    // Get gamification data with error handling
+    let weeklyActivity = [];
+    let recentAchievements = [];
+    let goalProgress = { weeklyProgress: 0, monthlyProgress: 0 };
+    
+    try {
+      weeklyActivity = await gamificationService.getWeeklyActivity(userId);
+    } catch (error) {
+      console.error('Error getting weekly activity:', error.message);
+    }
+    
+    try {
+      recentAchievements = await gamificationService.getRecentAchievements(userId);
+    } catch (error) {
+      console.error('Error getting recent achievements:', error.message);
+    }
+    
+    try {
+      goalProgress = await gamificationService.getGoalProgress(userId);
+    } catch (error) {
+      console.error('Error getting goal progress:', error.message);
+    }
+    
+    // Get last lesson
+    const lastProgress = await Progress.findOne({ userId })
+      .sort({ updatedAt: -1 })
+      .populate('lessonId', 'title')
+      .lean();
+    
+    // Get failed quizzes
+    const failedQuizzes = await Progress.find({
+      userId,
+      quizScore: { $lt: 70, $ne: null }
+    })
+      .populate('lessonId', 'title')
+      .sort({ updatedAt: -1 })
+      .limit(5)
+      .lean();
+    
+    // Get next lessons (lessons not started yet)
+    const completedLessonIds = progressRecords
+      .filter(p => p.status === 'completed')
+      .map(p => p.lessonId?._id || p.lessonId);
     
     res.json({
       success: true,
       data: {
         progress: progressRecords,
-        summary
+        summary,
+        weeklyActivity,
+        recentAchievements,
+        weeklyProgress: goalProgress.weeklyProgress,
+        monthlyProgress: goalProgress.monthlyProgress,
+        lastLesson: lastProgress?.lessonId || null,
+        failedQuizzes: failedQuizzes.map(q => q.lessonId).filter(Boolean),
+        nextLessons: [], // Can be populated with recommended lessons
+        reviewLessons: failedQuizzes.map(q => q.lessonId).filter(Boolean)
       }
     });
   } catch (error) {
@@ -31,12 +100,26 @@ export const getUserProgress = async (req, res) => {
 };
 
 /**
- * Record lesson completion
+ * Record lesson completion with gamification updates
  * POST /api/progress/lesson/:id
  */
 export const recordLessonCompletion = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const auth0Id = req.auth.payload.sub;
+    
+    // Find user in database
+    const user = await User.findOne({ auth0Id });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+    
+    const userId = user._id;
     const lessonId = req.params.id;
     const { timeSpent } = req.body;
     
@@ -51,9 +134,18 @@ export const recordLessonCompletion = async (req, res) => {
       validTimeSpent
     );
     
+    // Update gamification
+    const streak = await gamificationService.updateStreak(userId);
+    const newBadges = await gamificationService.checkAndAwardBadges(userId);
+    await gamificationService.updateTotalPoints(userId);
+    
     res.json({
       success: true,
       data: progress,
+      gamification: {
+        streak,
+        newBadges
+      },
       message: 'Lesson completion recorded successfully'
     });
   } catch (error) {
@@ -80,12 +172,26 @@ export const recordLessonCompletion = async (req, res) => {
 };
 
 /**
- * Submit quiz answers
+ * Submit quiz answers with gamification updates
  * POST /api/progress/quiz/:id
  */
 export const submitQuiz = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const auth0Id = req.auth.payload.sub;
+    
+    // Find user in database
+    const user = await User.findOne({ auth0Id });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+    
+    const userId = user._id;
     const lessonId = req.params.id;
     const { answers } = req.body;
     
@@ -102,9 +208,18 @@ export const submitQuiz = async (req, res) => {
     
     const result = await progressService.submitQuiz(userId, lessonId, answers);
     
+    // Update gamification
+    const streak = await gamificationService.updateStreak(userId);
+    const newBadges = await gamificationService.checkAndAwardBadges(userId);
+    await gamificationService.updateTotalPoints(userId);
+    
     res.json({
       success: true,
       data: result,
+      gamification: {
+        streak,
+        newBadges
+      },
       message: result.quizResults.passed 
         ? 'Quiz passed! Great job!' 
         : 'Quiz submitted. Keep practicing!'
@@ -137,6 +252,54 @@ export const submitQuiz = async (req, res) => {
       error: {
         code: 'QUIZ_SUBMISSION_ERROR',
         message: error.message || 'Failed to submit quiz'
+      }
+    });
+  }
+};
+
+/**
+ * Get leaderboard
+ * GET /api/progress/leaderboard
+ */
+export const getLeaderboard = async (req, res) => {
+  try {
+    const { timeframe = 'week' } = req.query;
+    const auth0Id = req.auth.payload.sub;
+    
+    // Find user in database
+    const user = await User.findOne({ auth0Id });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+    
+    const userId = user._id;
+    
+    const leaderboard = await gamificationService.getLeaderboard(timeframe);
+    
+    // Find user's rank
+    const userRank = leaderboard.findIndex(entry => entry.userId.toString() === userId) + 1;
+    
+    res.json({
+      success: true,
+      data: {
+        leaderboard: leaderboard.slice(0, 10), // Top 10
+        userRank: userRank || null,
+        topLearners: leaderboard.slice(0, 5)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'LEADERBOARD_ERROR',
+        message: error.message || 'Failed to fetch leaderboard'
       }
     });
   }

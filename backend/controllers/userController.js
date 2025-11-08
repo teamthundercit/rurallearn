@@ -47,17 +47,7 @@ export const handleAuthCallback = async (req, res) => {
  */
 export const getCurrentUser = async (req, res) => {
   try {
-    const user = await userService.getUserByAuth0Id(req.user.auth0Id);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          code: 'USER_NOT_FOUND',
-          message: 'User not found'
-        }
-      });
-    }
+    const user = await userService.getUserProfile(req.user.auth0Id);
 
     res.json({
       success: true,
@@ -76,6 +66,17 @@ export const getCurrentUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in getCurrentUser:', error);
+    
+    if (error.code === 'USER_NOT_FOUND') {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+    
     res.status(500).json({
       success: false,
       error: {
@@ -92,6 +93,42 @@ export const getCurrentUser = async (req, res) => {
 export const updateCurrentUser = async (req, res) => {
   try {
     const { name, avatar } = req.body;
+
+    // Input validation
+    const errors = [];
+    
+    if (name !== undefined) {
+      if (typeof name !== 'string') {
+        errors.push('Name must be a string');
+      } else if (name.trim().length === 0) {
+        errors.push('Name cannot be empty');
+      } else if (name.length > 100) {
+        errors.push('Name must be less than 100 characters');
+      }
+    }
+    
+    if (avatar !== undefined && avatar !== null) {
+      if (typeof avatar !== 'string') {
+        errors.push('Avatar must be a string URL');
+      } else if (avatar.length > 500) {
+        errors.push('Avatar URL must be less than 500 characters');
+      }
+      // Basic URL validation
+      else if (avatar.trim().length > 0 && !avatar.match(/^https?:\/\/.+/)) {
+        errors.push('Avatar must be a valid URL starting with http:// or https://');
+      }
+    }
+    
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid input data',
+          details: errors
+        }
+      });
+    }
 
     const user = await userService.updateUserProfile(req.user.auth0Id, {
       name,
@@ -115,6 +152,29 @@ export const updateCurrentUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Error in updateCurrentUser:', error);
+    
+    if (error.message === 'User not found') {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'User not found'
+        }
+      });
+    }
+    
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid input data',
+          details: Object.values(error.errors).map(err => err.message)
+        }
+      });
+    }
+    
     res.status(500).json({
       success: false,
       error: {

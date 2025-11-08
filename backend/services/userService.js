@@ -39,7 +39,25 @@ export const createOrUpdateUser = async (userData) => {
 };
 
 /**
- * Get user by Auth0 ID
+ * Get user profile by Auth0 ID
+ */
+export const getUserProfile = async (auth0Id) => {
+  try {
+    const user = await User.findOne({ auth0Id });
+    if (!user) {
+      const error = new Error('User not found');
+      error.code = 'USER_NOT_FOUND';
+      throw error;
+    }
+    return user;
+  } catch (error) {
+    console.error('Error in getUserProfile:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get user by Auth0 ID (alias for backward compatibility)
  */
 export const getUserByAuth0Id = async (auth0Id) => {
   try {

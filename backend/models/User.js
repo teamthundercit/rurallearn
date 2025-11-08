@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema({
       type: Boolean,
       default: false
     },
+    language: {
+      type: String,
+      enum: ['en', 'hi', 'es', 'fr', 'sw', 'pt', 'ar', 'bn'],
+      default: 'en'
+    },
     learningGoals: [{
       type: String
     }],

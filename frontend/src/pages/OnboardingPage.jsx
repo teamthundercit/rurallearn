@@ -131,7 +131,7 @@ const OnboardingPage = () => {
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary-600 mb-2">Welcome to RuralLearn! 🎓</h1>
+          <h1 className="text-3xl font-bold text-primary-600 mb-2">Welcome to EduAdapt! 🎓</h1>
           <p className="text-gray-600">Let's personalize your learning experience</p>
         </div>
 

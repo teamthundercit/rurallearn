@@ -64,10 +64,10 @@ const LoginPage = () => {
             </div>
           </div>
           <h1 className="text-6xl font-display font-black mb-3">
-            <span className="text-gradient-animate">RuralLearn</span>
+            <span className="text-gradient-animate">EduAdapt</span>
           </h1>
           <p className="text-gray-600 text-lg font-medium">
-            Empowering rural education through AI
+            Personalized adaptive learning powered by AI
           </p>
         </div>
 

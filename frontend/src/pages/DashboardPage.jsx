@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useApi from '../utils/useApi';
 import { getUserProfile, getUserProgress, getLeaderboard } from '../services/api';
 import ProgressCard from '../components/ProgressCard';
@@ -13,11 +14,13 @@ import LearningGoalsProgress from '../components/LearningGoalsProgress';
 import RecentAchievements from '../components/RecentAchievements';
 import StudyReminders from '../components/StudyReminders';
 import Leaderboard from '../components/Leaderboard';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const DashboardPage = () => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
   const api = useApi();
+  const { t } = useTranslation();
   const [userData, setUserData] = useState(null);
   const [progressData, setProgressData] = useState(null);
   const [leaderboardData, setLeaderboardData] = useState(null);
@@ -171,11 +174,14 @@ const DashboardPage = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-xl">🎓</span>
               </div>
-              <h1 className="text-2xl font-display font-black text-gradient">RuralLearn</h1>
+              <h1 className="text-2xl font-display font-black text-gradient">EduAdapt</h1>
             </div>
             
             {/* User Profile */}
             <div className="flex items-center gap-4">
+              {/* Language Switcher */}
+              <LanguageSwitcher />
+              
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-semibold text-gray-900">{displayUser?.name}</p>
                 <p className="text-xs text-gray-600">{displayUser?.email}</p>
@@ -201,7 +207,7 @@ const DashboardPage = () => {
                 onClick={handleLogout}
                 className="btn-secondary text-sm px-4 py-2"
               >
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline">{t('common.logout')}</span>
                 <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
@@ -216,12 +222,11 @@ const DashboardPage = () => {
         {/* Welcome Section with Animation */}
         <div className="mb-8 animate-slide-down">
           <h2 className="text-4xl sm:text-5xl font-display font-black mb-3">
-            <span className="text-gray-900">Welcome back, </span>
-            <span className="text-gradient-animate">{displayUser?.name?.split(' ')[0]}!</span>
+            <span className="text-gray-900">{t('dashboard.title', { name: displayUser?.name?.split(' ')[0] || 'User' })}</span>
             <span className="inline-block animate-bounce-slow ml-2">👋</span>
           </h2>
           <p className="text-gray-600 text-lg">
-            Continue your learning journey and achieve your goals
+            {t('dashboard.subtitle')}
           </p>
         </div>
 
@@ -229,21 +234,21 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-scale-in">
           <ProgressCard
             icon="📚"
-            title="Lessons Completed"
+            title={t('dashboard.lessonsCompleted')}
             value={metrics.completedLessons}
             color="primary"
             trend={5}
           />
           <ProgressCard
             icon="🎯"
-            title="Average Score"
+            title={t('dashboard.averageScore')}
             value={`${metrics.averageScore}%`}
             color="success"
             trend={metrics.averageScore > 70 ? 3 : -2}
           />
           <ProgressCard
             icon="⏱️"
-            title="Time Spent"
+            title={t('dashboard.timeSpent')}
             value={`${Math.round(metrics.totalTimeSpent)}m`}
             color="accent"
             trend={8}
@@ -317,13 +322,13 @@ const DashboardPage = () => {
           <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex-1">
               <h3 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <span>Ready to Learn?</span>
+                <span>{t('dashboard.readyToLearn')}</span>
                 <span className="text-3xl animate-bounce-slow">🚀</span>
               </h3>
               <p className="text-gray-600 text-lg">
                 {progressData?.progress && progressData.progress.length > 0
-                  ? 'Continue your learning journey with new lessons'
-                  : 'Start your learning journey by exploring available lessons'}
+                  ? t('dashboard.continueJourney')
+                  : t('dashboard.startJourney')}
               </p>
             </div>
             <button
@@ -331,7 +336,7 @@ const DashboardPage = () => {
               className="btn-primary text-lg group/btn whitespace-nowrap"
             >
               <span className="flex items-center gap-2">
-                Browse Lessons
+                {t('dashboard.browseLessons')}
                 <svg className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

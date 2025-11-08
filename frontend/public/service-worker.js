@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'rurallearn-v1';
-const STATIC_CACHE_NAME = 'rurallearn-static-v1';
+const CACHE_NAME = 'eduadapt-v1';
+const STATIC_CACHE_NAME = 'eduadapt-static-v1';
 
 // Static assets to cache on install
 const STATIC_ASSETS = [

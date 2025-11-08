@@ -1,6 +1,6 @@
 // IndexedDB wrapper for offline lesson caching
 
-const DB_NAME = 'RuralLearnDB';
+const DB_NAME = 'EduAdaptDB';
 const DB_VERSION = 1;
 const LESSONS_STORE = 'lessons';
 const PROGRESS_STORE = 'progress';

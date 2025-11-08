@@ -189,25 +189,51 @@ export const updateCurrentUser = async (req, res) => {
 };
 
 /**
- * Update user preferences (onboarding)
+ * Update user preferences (onboarding or partial updates)
  */
 export const updateUserPreferences = async (req, res) => {
   try {
-    const { learningGoals, difficultyLevel, topicsOfInterest } = req.body;
+    const { learningGoals, difficultyLevel, topicsOfInterest, language } = req.body;
 
-    // Input validation
+    // Build update object with only provided fields
+    const updates = {};
     const errors = [];
     
-    if (!learningGoals || !Array.isArray(learningGoals) || learningGoals.length === 0) {
-      errors.push('Learning goals must be a non-empty array');
+    // Validate learningGoals if provided
+    if (learningGoals !== undefined) {
+      if (!Array.isArray(learningGoals) || learningGoals.length === 0) {
+        errors.push('Learning goals must be a non-empty array');
+      } else {
+        updates.learningGoals = learningGoals;
+      }
     }
     
-    if (!difficultyLevel || !['beginner', 'intermediate', 'advanced'].includes(difficultyLevel)) {
-      errors.push('Difficulty level must be one of: beginner, intermediate, advanced');
+    // Validate difficultyLevel if provided
+    if (difficultyLevel !== undefined) {
+      if (!['beginner', 'intermediate', 'advanced'].includes(difficultyLevel)) {
+        errors.push('Difficulty level must be one of: beginner, intermediate, advanced');
+      } else {
+        updates.difficultyLevel = difficultyLevel;
+      }
     }
     
-    if (!topicsOfInterest || !Array.isArray(topicsOfInterest) || topicsOfInterest.length === 0) {
-      errors.push('Topics of interest must be a non-empty array');
+    // Validate topicsOfInterest if provided
+    if (topicsOfInterest !== undefined) {
+      if (!Array.isArray(topicsOfInterest) || topicsOfInterest.length === 0) {
+        errors.push('Topics of interest must be a non-empty array');
+      } else {
+        updates.topicsOfInterest = topicsOfInterest;
+      }
+    }
+    
+    // Validate language if provided
+    if (language !== undefined) {
+      const supportedLanguages = ['en', 'hi', 'es', 'fr', 'sw', 'pt', 'ar', 'bn'];
+      if (!supportedLanguages.includes(language)) {
+        errors.push(`Language must be one of: ${supportedLanguages.join(', ')}`);
+      } else {
+        updates.language = language;
+      }
     }
     
     if (errors.length > 0) {
@@ -220,12 +246,19 @@ export const updateUserPreferences = async (req, res) => {
         }
       });
     }
+    
+    // Check if at least one field is being updated
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'NO_UPDATES',
+          message: 'No valid fields provided for update'
+        }
+      });
+    }
 
-    const user = await userService.updateUserPreferences(req.user.auth0Id, {
-      learningGoals,
-      difficultyLevel,
-      topicsOfInterest
-    });
+    const user = await userService.updateUserPreferences(req.user.auth0Id, updates);
 
     res.json({
       success: true,

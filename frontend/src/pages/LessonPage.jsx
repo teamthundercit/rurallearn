@@ -208,7 +208,7 @@ const LessonPage = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-xl">🎓</span>
               </div>
-              <h1 className="text-xl font-display font-black text-gradient">RuralLearn</h1>
+              <h1 className="text-xl font-display font-black text-gradient">EduAdapt</h1>
             </div>
           </div>
         </div>

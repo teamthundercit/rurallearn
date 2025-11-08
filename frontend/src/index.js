@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import './i18n/config'; // Initialize i18n
 // Temporarily disabled for debugging
 // import { logPerformanceMetrics } from './reportWebVitals';
 // import * as serviceWorkerRegistration from './utils/serviceWorkerRegistration';

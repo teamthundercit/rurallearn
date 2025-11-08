@@ -7,11 +7,16 @@ const CallbackPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('CallbackPage - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading, 'error:', error);
     if (!isLoading) {
       if (isAuthenticated) {
+        console.log('Authentication successful, navigating to dashboard...');
         navigate('/dashboard');
       } else if (error) {
         console.error('Authentication error:', error);
+        navigate('/login');
+      } else {
+        console.log('Not authenticated and no error, redirecting to login...');
         navigate('/login');
       }
     }

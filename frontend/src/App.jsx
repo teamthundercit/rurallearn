@@ -13,6 +13,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const LessonsListPage = lazy(() => import('./pages/LessonsListPage'));
 const LessonPage = lazy(() => import('./pages/LessonPage'));
 const ChatbotWidget = lazy(() => import('./components/ChatbotWidget'));
+const TestAuthPage = lazy(() => import('./pages/TestAuthPage'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -48,6 +49,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/test-auth" element={<TestAuthPage />} />
           <Route path="/callback" element={<CallbackPage />} />
           <Route
             path="/dashboard"
@@ -75,16 +77,16 @@ function AppContent() {
           />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-        
+
         {/* Show chatbot only when authenticated */}
         {isAuthenticated && <ChatbotWidget />}
       </Suspense>
-      
+
       {/* Show offline indicator */}
-      <OfflineIndicator 
-        isOnline={isOnline} 
-        isSyncing={isSyncing} 
-        unsyncedCount={unsyncedCount} 
+      <OfflineIndicator
+        isOnline={isOnline}
+        isSyncing={isSyncing}
+        unsyncedCount={unsyncedCount}
       />
     </>
   );

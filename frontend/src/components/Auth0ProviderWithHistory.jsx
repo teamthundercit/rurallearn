@@ -35,11 +35,12 @@ const Auth0ProviderWithHistory = ({ children }) => {
       authorizationParams={{
         redirect_uri: redirectUri,
         audience: audience,
-        scope: 'openid profile email'
+        scope: 'openid profile email',
       }}
       onRedirectCallback={onRedirectCallback}
       useRefreshTokens={true}
       cacheLocation="localstorage"
+      skipRedirectCallback={window.location.pathname === '/test-auth'}
     >
       {children}
     </Auth0Provider>

@@ -137,4 +137,34 @@ export const recordLessonCompletion = async (token, lessonId, timeSpent = 0) => 
   }
 };
 
+// AI API functions
+export const getRecommendations = async (token) => {
+  try {
+    const response = await api.post('/api/ai/recommendations', {}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to fetch recommendations');
+  }
+};
+
+export const sendChatMessage = async (token, message, conversationHistory = []) => {
+  try {
+    const response = await api.post('/api/ai/chat',
+      { message, conversationHistory },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error?.message || 'Failed to send chat message');
+  }
+};
+
 export default api;

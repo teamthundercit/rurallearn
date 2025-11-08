@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import useApi from '../utils/useApi';
 import { getUserProfile, getUserProgress } from '../services/api';
 import ProgressCard from '../components/ProgressCard';
+import RecommendationPanel from '../components/RecommendationPanel';
 
 const DashboardPage = () => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
@@ -204,6 +205,11 @@ const DashboardPage = () => {
             value={`${Math.round(metrics.totalTimeSpent)}m`}
             color="accent"
           />
+        </div>
+
+        {/* AI Recommendations Section */}
+        <div className="mb-8">
+          <RecommendationPanel />
         </div>
 
         {/* Recent Progress Section */}

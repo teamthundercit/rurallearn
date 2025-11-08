@@ -62,6 +62,21 @@ const lessonSchema = new mongoose.Schema({
   tags: {
     type: [String],
     default: []
+  },
+  source: {
+    name: {
+      type: String,
+      default: 'Original'
+    },
+    url: {
+      type: String
+    },
+    license: {
+      type: String
+    },
+    attribution: {
+      type: String
+    }
   }
 }, {
   timestamps: true

@@ -131,7 +131,7 @@ const OnboardingPage = () => {
       <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary-600 mb-2">Welcome to EduAdapt! 🎓</h1>
+          <h1 className="text-3xl font-bold text-gradient-animate mb-2">Welcome to EduAdapt! 🎓</h1>
           <p className="text-gray-600">Let's personalize your learning experience</p>
         </div>
 
@@ -168,7 +168,7 @@ const OnboardingPage = () => {
         {currentStep === 1 && (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">What are your learning goals?</h2>
+              <h2 className="text-2xl font-bold text-gradient-animate mb-2">What are your learning goals?</h2>
               <p className="text-gray-600">Select all that apply</p>
             </div>
             
@@ -197,7 +197,7 @@ const OnboardingPage = () => {
         {currentStep === 2 && (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">What's your experience level?</h2>
+              <h2 className="text-2xl font-bold text-gradient-animate mb-2">What's your experience level?</h2>
               <p className="text-gray-600">Choose the level that best describes you</p>
             </div>
             
@@ -229,7 +229,7 @@ const OnboardingPage = () => {
         {currentStep === 3 && (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">What topics interest you?</h2>
+              <h2 className="text-2xl font-bold text-gradient-animate mb-2">What topics interest you?</h2>
               <p className="text-gray-600">Select at least one topic</p>
             </div>
             

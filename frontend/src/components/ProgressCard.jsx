@@ -1,78 +1,101 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import TrendBadge from './TrendBadge';
+import GradientProgressBar from './GradientProgressBar';
 
-const ProgressCard = ({ icon, title, value, color = 'primary', trend }) => {
-  const colorClasses = {
-    primary: {
-      bg: 'from-primary-500 to-primary-600',
-      text: 'text-primary-600',
-      light: 'bg-primary-50',
-      border: 'border-primary-200'
+const ProgressCard = ({ 
+  icon, 
+  title, 
+  value, 
+  total,
+  color = { from: 'cyan-400', to: 'blue-500' },
+  trend,
+  animation = 'scale',
+  onClick
+}) => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleChange = (e) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Animation variants for the icon
+  const iconAnimations = prefersReducedMotion ? {} : {
+    scale: { 
+      scale: [1, 1.1, 1], 
+      transition: { repeat: Infinity, duration: 2, ease: 'easeInOut' } 
     },
-    secondary: {
-      bg: 'from-secondary-500 to-secondary-600',
-      text: 'text-secondary-600',
-      light: 'bg-secondary-50',
-      border: 'border-secondary-200'
+    tilt: { 
+      rotate: [0, 5, -5, 0], 
+      transition: { repeat: Infinity, duration: 3, ease: 'easeInOut' } 
     },
-    accent: {
-      bg: 'from-accent-500 to-accent-600',
-      text: 'text-accent-600',
-      light: 'bg-accent-50',
-      border: 'border-accent-200'
-    },
-    success: {
-      bg: 'from-success-500 to-success-600',
-      text: 'text-success-600',
-      light: 'bg-success-50',
-      border: 'border-success-200'
+    pulse: { 
+      opacity: [1, 0.7, 1], 
+      transition: { repeat: Infinity, duration: 2, ease: 'easeInOut' } 
     }
   };
 
-  const colors = colorClasses[color] || colorClasses.primary;
+  // Calculate percentage if total is provided
+  const percentage = total ? (value / total) * 100 : null;
+
+  const motionProps = prefersReducedMotion ? {
+    initial: { opacity: 1 },
+    animate: { opacity: 1 },
+    transition: { duration: 0 }
+  } : {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    whileHover: { scale: 1.05, y: -5 },
+    transition: { duration: 0.3 }
+  };
 
   return (
-    <div className="card-gradient hover-lift group cursor-pointer overflow-hidden relative">
-      {/* Animated Background Gradient */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${colors.bg} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+    <motion.div
+      className="glass-neon-blue p-6 sweep-light hover-lift group cursor-pointer gpu-accelerated"
+      {...motionProps}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && onClick) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      tabIndex={onClick ? 0 : -1}
+      role={onClick ? "button" : "article"}
+      aria-label={`${title}: ${value}${total ? ` out of ${total}` : ''}${trend ? `, trending ${trend > 0 ? 'up' : 'down'} by ${Math.abs(trend)}%` : ''}`}
+    >
+      {/* Icon Container with Gradient Background */}
+      <motion.div
+        className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-${color.from} to-${color.to} 
+                    flex items-center justify-center text-3xl mb-4 shadow-neon-blue gpu-accelerated`}
+        animate={prefersReducedMotion ? {} : iconAnimations[animation]}
+      >
+        {icon}
+      </motion.div>
       
-      <div className="relative z-10">
-        {/* Icon with animated background */}
-        <div className={`inline-flex items-center justify-center w-14 h-14 ${colors.light} rounded-2xl mb-4 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-          <span className="text-3xl">{icon}</span>
-        </div>
-        
-        {/* Title */}
-        <h3 className="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">
-          {title}
-        </h3>
-        
-        {/* Value with gradient on hover */}
-        <div className="flex items-end justify-between">
-          <p className={`text-4xl font-black ${colors.text} group-hover:text-gradient transition-all duration-300`}>
-            {value}
-          </p>
-          
-          {/* Trend indicator */}
-          {trend && (
-            <div className={`flex items-center gap-1 text-sm font-semibold ${trend > 0 ? 'text-success-600' : 'text-red-600'}`}>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {trend > 0 ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                )}
-              </svg>
-              <span>{Math.abs(trend)}%</span>
-            </div>
-          )}
-        </div>
-        
-        {/* Progress bar */}
-        <div className="mt-4 progress-bar">
-          <div className={`progress-fill bg-gradient-to-r ${colors.bg}`} style={{ width: `${Math.min(value * 5, 100)}%` }}></div>
-        </div>
+      {/* Title and Trend Badge */}
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xl font-bold text-white">{title}</h3>
+        {trend && <TrendBadge trend={trend} />}
       </div>
-    </div>
+      
+      {/* Value Display */}
+      <div className="text-3xl font-black text-neon-animate mb-4">
+        {value}
+        {total && <span className="text-lg text-gray-400">/{total}</span>}
+      </div>
+      
+      {/* Progress Bar (if total is provided) */}
+      {percentage !== null && (
+        <GradientProgressBar percentage={percentage} color={color} />
+      )}
+    </motion.div>
   );
 };
 

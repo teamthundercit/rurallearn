@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { getLessons, getRecommendations } from '../services/api';
@@ -8,6 +8,7 @@ const LessonsListPage = () => {
   const { getAccessTokenSilently } = useAuth0();
   
   const [lessons, setLessons] = useState([]);
+  const [allLessons, setAllLessons] = useState([]); // Store all lessons for tag extraction
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,7 +16,31 @@ const LessonsListPage = () => {
     difficulty: '',
     tags: ''
   });
+  const [tagInput, setTagInput] = useState('');
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
 
+  // Fetch all lessons once for tag extraction
+  useEffect(() => {
+    const fetchAllLessons = async () => {
+      try {
+        const token = await getAccessTokenSilently({
+          authorizationParams: {
+            audience: process.env.REACT_APP_AUTH0_AUDIENCE,
+            scope: 'openid profile email'
+          }
+        });
+
+        const response = await getLessons(token, {});
+        setAllLessons(response.data?.lessons || response.lessons || []);
+      } catch (err) {
+        console.error('Error loading all lessons:', err);
+      }
+    };
+
+    fetchAllLessons();
+  }, [getAccessTokenSilently]);
+
+  // Debounced fetch with filters
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -35,7 +60,9 @@ const LessonsListPage = () => {
           getRecommendations(token).catch(() => null) // Don't fail if recommendations fail
         ]);
 
-        setLessons(lessonsResponse.data?.lessons || lessonsResponse.lessons || []);
+        const fetchedLessons = lessonsResponse.data?.lessons || lessonsResponse.lessons || [];
+        console.log('Fetched lessons with filters:', filters, 'Count:', fetchedLessons.length);
+        setLessons(fetchedLessons);
         if (recommendationsResponse) {
           setRecommendations(recommendationsResponse.data);
         }
@@ -47,8 +74,54 @@ const LessonsListPage = () => {
       }
     };
 
-    fetchData();
+    // Debounce the search
+    const timeoutId = setTimeout(() => {
+      fetchData();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [getAccessTokenSilently, filters]);
+
+  // Extract all unique tags from lessons
+  const allTags = useMemo(() => {
+    const tagSet = new Set();
+    allLessons.forEach(lesson => {
+      if (lesson.tags && Array.isArray(lesson.tags)) {
+        lesson.tags.forEach(tag => tagSet.add(tag.toLowerCase()));
+      }
+    });
+    return Array.from(tagSet).sort();
+  }, [allLessons]);
+
+  // Filter tags based on input
+  const suggestedTags = useMemo(() => {
+    if (!tagInput.trim()) return allTags.slice(0, 8);
+    
+    const input = tagInput.toLowerCase().trim();
+    return allTags
+      .filter(tag => tag.includes(input))
+      .slice(0, 8);
+  }, [tagInput, allTags]);
+
+  const handleTagSelect = (tag) => {
+    console.log('Tag selected:', tag);
+    setTagInput(tag);
+    setFilters({ ...filters, tags: tag });
+    setShowTagSuggestions(false);
+  };
+
+  const handleTagInputChange = (e) => {
+    const value = e.target.value;
+    setTagInput(value);
+    setShowTagSuggestions(true);
+  };
+
+  const handleTagInputKeyPress = (e) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      setFilters({ ...filters, tags: tagInput.trim() });
+      setShowTagSuggestions(false);
+    }
+  };
 
   const handleLessonClick = (lessonId) => {
     navigate(`/lessons/${lessonId}`);
@@ -145,14 +218,19 @@ const LessonsListPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {recommendations.recommendations.slice(0, 3).map((rec, index) => {
-                const lesson = lessons.find(l => l.title === rec.lessonTitle);
-                if (!lesson) return null;
+                // Try to find lesson in both filtered lessons and all lessons
+                const lesson = lessons.find(l => l.title === rec.lessonTitle) || 
+                              allLessons.find(l => l.title === rec.lessonTitle);
+                
+                if (!lesson) {
+                  console.log('Lesson not found for recommendation:', rec.lessonTitle);
+                  return null;
+                }
 
                 return (
                   <div
                     key={index}
-                    onClick={() => handleLessonClick(lesson._id)}
-                    className="bg-white rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow border-2 border-primary-300"
+                    className="bg-white rounded-lg p-4 hover:shadow-lg transition-shadow border-2 border-primary-300"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -178,7 +256,14 @@ const LessonsListPage = () => {
                     <p className="text-sm text-gray-600 mb-3">
                       {rec.reason}
                     </p>
-                    <button className="w-full bg-primary-600 text-white px-3 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Navigating to lesson:', lesson._id);
+                        handleLessonClick(lesson._id);
+                      }}
+                      className="w-full bg-primary-600 text-white px-3 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                    >
                       Start Learning
                     </button>
                   </div>
@@ -212,17 +297,74 @@ const LessonsListPage = () => {
                 <option value="advanced">🌳 Advanced</option>
               </select>
             </div>
-            <div>
+            <div className="relative">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Search Tags
               </label>
-              <input
-                type="text"
-                value={filters.tags}
-                onChange={(e) => setFilters({ ...filters, tags: e.target.value })}
-                placeholder="e.g., programming, math..."
-                className="input-modern"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={handleTagInputChange}
+                  onKeyPress={handleTagInputKeyPress}
+                  onFocus={() => setShowTagSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowTagSuggestions(false), 200)}
+                  placeholder="e.g., programming, math..."
+                  className="input-modern flex-1"
+                />
+                <button
+                  onClick={() => {
+                    if (tagInput.trim()) {
+                      setFilters({ ...filters, tags: tagInput.trim() });
+                      setShowTagSuggestions(false);
+                    }
+                  }}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                >
+                  Search
+                </button>
+              </div>
+              
+              {/* Tag Suggestions Dropdown */}
+              {showTagSuggestions && suggestedTags.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+                  <div className="p-2">
+                    <p className="text-xs text-gray-500 mb-2 px-2">
+                      {tagInput.trim() ? 'Matching tags' : 'Popular tags'}
+                    </p>
+                    {suggestedTags.map((tag, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleTagSelect(tag)}
+                        className="w-full text-left px-3 py-2 rounded-md hover:bg-primary-50 hover:text-primary-700 transition-colors text-sm flex items-center gap-2"
+                      >
+                        <span className="text-gray-400">#</span>
+                        <span className="font-medium">{tag}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Selected Tag Display */}
+              {filters.tags && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800 border border-primary-200">
+                    #{filters.tags}
+                    <button
+                      onClick={() => {
+                        setTagInput('');
+                        setFilters({ ...filters, tags: '' });
+                      }}
+                      className="ml-1 hover:text-primary-900"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -231,7 +373,22 @@ const LessonsListPage = () => {
         {lessons.length === 0 ? (
           <div className="card-gradient text-center py-16">
             <span className="text-6xl mb-4 block">📚</span>
-            <p className="text-gray-600 text-lg font-medium">No lessons available</p>
+            <p className="text-gray-600 text-lg font-medium mb-4">
+              {filters.tags || filters.difficulty 
+                ? 'No lessons match your filters' 
+                : 'No lessons available'}
+            </p>
+            {(filters.tags || filters.difficulty) && (
+              <button
+                onClick={() => {
+                  setFilters({ difficulty: '', tags: '' });
+                  setTagInput('');
+                }}
+                className="btn-secondary"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -239,7 +396,7 @@ const LessonsListPage = () => {
               <div
                 key={lesson._id}
                 onClick={() => handleLessonClick(lesson._id)}
-                className="card-gradient hover-lift cursor-pointer group overflow-hidden"
+                className="card-gradient hover-lift tilt-3d cursor-pointer group overflow-hidden"
               >
                 <div className="p-6">
                   <div className="flex items-center flex-wrap gap-2 mb-3">

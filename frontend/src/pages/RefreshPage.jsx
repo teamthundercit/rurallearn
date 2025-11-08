@@ -90,7 +90,7 @@ const RefreshPage = () => {
             <span className="text-4xl">{activity.icon}</span>
           </div>
           
-          <h1 className="text-4xl font-display font-black text-gray-900 mb-2">
+          <h1 className="text-4xl font-display font-black text-gradient-animate mb-2">
             Take a Quick Break 🌈
           </h1>
           
@@ -158,7 +158,7 @@ const MusicActivity = () => {
 
   return (
     <div className="text-center">
-      <h3 className="text-xl font-bold text-gray-900 mb-4">
+      <h3 className="text-xl font-bold text-gradient-animate mb-4">
         🎵 {selectedTrack.title}
       </h3>
       
@@ -284,7 +284,7 @@ const GameActivity = () => {
 
   return (
     <div className="text-center">
-      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+      <h3 className="text-2xl font-bold text-gradient-animate mb-2">
         Color Match Game
       </h3>
       

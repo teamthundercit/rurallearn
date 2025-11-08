@@ -5,15 +5,35 @@ import Auth0ProviderWithHistory from './components/Auth0ProviderWithHistory';
 import ProtectedRoute from './components/ProtectedRoute';
 import OfflineIndicator from './components/OfflineIndicator';
 import { useOffline } from './hooks/useOffline';
+import usePerformanceMonitor from './hooks/usePerformanceMonitor';
+
+/**
+ * Code Splitting Strategy:
+ * - Each page is lazy-loaded as a separate bundle
+ * - Routes are preloaded on hover/focus for better perceived performance
+ * - Suspense boundaries provide loading states during code splitting
+ * - This reduces initial bundle size and improves Time to Interactive (TTI)
+ */
 
 // Lazy load pages for code splitting
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
-const LessonsListPage = lazy(() => import('./pages/LessonsListPage'));
-const LessonPage = lazy(() => import('./pages/LessonPage'));
-const RefreshPage = lazy(() => import('./pages/RefreshPage'));
-const ChatbotWidget = lazy(() => import('./components/ChatbotWidget'));
+const LoginPage = lazy(() => import(/* webpackChunkName: "login" */ './pages/LoginPage'));
+const OnboardingPage = lazy(() => import(/* webpackChunkName: "onboarding" */ './pages/OnboardingPage'));
+const DashboardPage = lazy(() => import(/* webpackChunkName: "dashboard" */ './pages/DashboardPage'));
+const LessonsListPage = lazy(() => import(/* webpackChunkName: "lessons-list" */ './pages/LessonsListPage'));
+const LessonPage = lazy(() => import(/* webpackChunkName: "lesson" */ './pages/LessonPage'));
+const RefreshPage = lazy(() => import(/* webpackChunkName: "refresh" */ './pages/RefreshPage'));
+const ChatbotWidget = lazy(() => import(/* webpackChunkName: "chatbot" */ './components/ChatbotWidget'));
+
+// Export lazy components for preloading
+export const lazyRoutes = {
+  LoginPage,
+  OnboardingPage,
+  DashboardPage,
+  LessonsListPage,
+  LessonPage,
+  RefreshPage,
+  ChatbotWidget
+};
 
 // Loading component
 const LoadingSpinner = () => (
@@ -25,6 +45,9 @@ const LoadingSpinner = () => (
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth0();
   const { isOnline, isSyncing, unsyncedCount } = useOffline();
+  
+  // Monitor performance and adaptively reduce animations if needed
+  usePerformanceMonitor();
 
   if (isLoading) {
     return <LoadingSpinner />;

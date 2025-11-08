@@ -20,19 +20,19 @@
   .btn-primary {
     @apply bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-3 rounded-xl 
            hover:from-primary-700 hover:to-primary-800 transition-all duration-300 
-           shadow-lg hover:shadow-xl hover:scale-105 font-medium;
+           shadow-lg hover:shadow-xl hover:scale-105 font-medium btn-ripple;
   }
   
   .btn-secondary {
     @apply bg-white text-primary-600 px-6 py-3 rounded-xl border-2 border-primary-600 
            hover:bg-primary-50 transition-all duration-300 shadow-md hover:shadow-lg 
-           hover:scale-105 font-medium;
+           hover:scale-105 font-medium btn-ripple;
   }
   
   .btn-accent {
     @apply bg-gradient-to-r from-accent-500 to-accent-600 text-white px-6 py-3 rounded-xl 
            hover:from-accent-600 hover:to-accent-700 transition-all duration-300 
-           shadow-lg hover:shadow-xl hover:scale-105 font-medium;
+           shadow-lg hover:shadow-xl hover:scale-105 font-medium btn-ripple;
   }
   
   /* Modern Cards */
@@ -119,6 +119,121 @@
     @apply bg-gradient-to-br from-primary-500 via-purple-500 to-secondary-500 
            bg-300% animate-gradient;
   }
+  
+  /* Glass-Neon Hybrid Cards */
+  .glass-neon {
+    @apply bg-white/10 backdrop-blur-glass rounded-3xl border border-white/20 
+           shadow-glass hover:shadow-glass-lg transition-all duration-500;
+  }
+  
+  .glass-neon-blue {
+    @apply glass-neon hover:shadow-neon-blue hover:border-blue-400/30;
+  }
+  
+  .glass-neon-violet {
+    @apply glass-neon hover:shadow-neon-violet hover:border-violet-400/30;
+  }
+  
+  /* Animated Gradient Text */
+  .text-neon-animate {
+    @apply bg-gradient-to-r from-blue-400 via-violet-400 to-fuchsia-400 
+           bg-clip-text text-transparent bg-300% animate-gradient;
+  }
+  
+  /* 3D Tilt Effect */
+  .tilt-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+  }
+  
+  .tilt-3d:hover {
+    transform: perspective(1000px) rotateX(5deg) rotateY(5deg) scale(1.05);
+  }
+  
+  /* Mobile: Simplify 3D transforms */
+  @media (max-width: 640px) {
+    .tilt-3d:hover {
+      transform: scale(1.02);
+    }
+  }
+  
+  /* Tablet: Enable most animations */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .tilt-3d:hover {
+      transform: perspective(1000px) rotateX(3deg) rotateY(3deg) scale(1.03);
+    }
+  }
+  
+  /* Desktop: Enable all animations (full effect) */
+  @media (min-width: 1025px) {
+    .particle {
+      animation: particleFloat 20s infinite ease-in-out;
+    }
+    
+    .tilt-3d:hover {
+      transform: perspective(1000px) rotateX(5deg) rotateY(5deg) scale(1.05);
+    }
+  }
+  
+  /* Ripple Button Effect */
+  .btn-ripple {
+    @apply relative overflow-hidden;
+  }
+  
+  .btn-ripple::before {
+    content: '';
+    @apply absolute inset-0 bg-white/20 rounded-full scale-0;
+    animation: ripple 0.6s ease-out;
+  }
+  
+  .btn-ripple:active::before {
+    animation: ripple 0.6s ease-out;
+  }
+  
+  /* Light Sweep Effect */
+  .sweep-light {
+    @apply relative overflow-hidden;
+  }
+  
+  .sweep-light::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent;
+    transform: translateX(-100%);
+  }
+  
+  .sweep-light:hover::after {
+    animation: sweep 1.5s ease-in-out;
+  }
+  
+  /* Holographic Background */
+  .holographic {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(12px);
+  }
+  
+  /* Sticky Glass Header */
+  .sticky-glass {
+    @apply sticky top-0 z-50 bg-white/80 backdrop-blur-glass border-b border-white/20 
+           shadow-glass transition-all duration-300;
+  }
+  
+  /* Gradient Progress Bar with Glow - Optimized for GPU */
+  .progress-glow {
+    @apply h-3 bg-gray-800/30 rounded-full overflow-hidden relative;
+  }
+  
+  .progress-glow-fill {
+    @apply h-full bg-gradient-to-r rounded-full shadow-neon-blue;
+    /* Use transform instead of width for better performance */
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
 }
 
 @layer utilities {
@@ -135,6 +250,219 @@
   
   .animate-slide-in {
     animation: slide-in 0.3s ease-out;
+  }
+  
+  /* Particle Animation */
+  .particle {
+    @apply absolute rounded-full bg-gradient-to-br opacity-30 animate-particle-float;
+  }
+  
+  /* Mobile: Simplify particle animation */
+  @media (max-width: 640px) {
+    .particle {
+      animation: none;
+      opacity: 0.2;
+    }
+  }
+  
+  /* GPU Acceleration - Apply to all animated elements */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  /* Apply GPU acceleration to particles */
+  .particle {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+  
+  /* Apply GPU acceleration to cards */
+  .glass-neon,
+  .glass-neon-blue,
+  .glass-neon-violet,
+  .card,
+  .card-gradient,
+  .card-glow {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  
+  /* Apply GPU acceleration to buttons */
+  .btn-primary,
+  .btn-secondary,
+  .btn-accent,
+  .btn-ripple {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  
+  /* Apply GPU acceleration to text animations */
+  .text-gradient-animate,
+  .text-neon-animate {
+    transform: translateZ(0);
+    will-change: background-position;
+    backface-visibility: hidden;
+  }
+  
+  /* Apply GPU acceleration to 3D tilt effects */
+  .tilt-3d {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  
+  /* Apply GPU acceleration to hover effects */
+  .hover-lift {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  
+  /* Mobile: Minimum touch target size */
+  @media (max-width: 640px) {
+    button, a, [role="button"] {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  }
+  
+  /* Tablet: Enable most animations */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .tilt-3d:hover {
+      transform: perspective(1000px) rotateX(3deg) rotateY(3deg) scale(1.03);
+    }
+  }
+  
+  /* Desktop: Enable all animations (full effect) */
+  @media (min-width: 1025px) {
+    .particle {
+      animation: particleFloat 20s infinite ease-in-out;
+    }
+    
+    .tilt-3d:hover {
+      transform: perspective(1000px) rotateX(5deg) rotateY(5deg) scale(1.05);
+    }
+  }
+  
+  /* WCAG AA Contrast Compliance */
+  .text-contrast-safe {
+    color: #1f2937; /* gray-800 - ensures 4.5:1 contrast on white */
+  }
+  
+  .text-contrast-safe-light {
+    color: #ffffff; /* white - ensures 4.5:1 contrast on dark backgrounds */
+  }
+  
+  /* Ensure gradient text has sufficient contrast fallback */
+  @supports not (background-clip: text) {
+    .text-gradient, .text-gradient-animate, .text-neon-animate {
+      color: #1f2937;
+      background: none;
+    }
+  }
+  
+  /* Keyboard Navigation Focus Indicators */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  }
+  
+  button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+    @apply ring-2 ring-primary-500 ring-offset-2;
+  }
+  
+  input:focus-visible, textarea:focus-visible, select:focus-visible {
+    @apply ring-2 ring-primary-500 ring-offset-2;
+  }
+  
+  /* Ensure interactive elements are keyboard accessible */
+  .glass-neon-blue:focus-visible, .glass-neon-violet:focus-visible {
+    @apply ring-2 ring-blue-400 ring-offset-2;
+  }
+  
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    
+    .particle {
+      animation: none !important;
+      opacity: 0.15;
+    }
+    
+    .tilt-3d:hover {
+      transform: none !important;
+    }
+    
+    .hover-lift:hover {
+      transform: none !important;
+    }
+    
+    .text-gradient-animate,
+    .text-neon-animate {
+      animation: none !important;
+      background-position: 0% 50% !important;
+    }
+    
+    .sweep-light::after {
+      animation: none !important;
+    }
+    
+    .btn-ripple::before {
+      animation: none !important;
+    }
+  }
+  
+  /* Adaptive Performance - Reduce animations when FPS drops below 30 */
+  body.reduce-animations .particle {
+    animation: none !important;
+    opacity: 0.1;
+    display: none; /* Hide particles completely on low-end devices */
+  }
+  
+  body.reduce-animations .tilt-3d:hover {
+    transform: scale(1.02) !important;
+  }
+  
+  body.reduce-animations .hover-lift:hover {
+    transform: translateY(-2px) !important;
+  }
+  
+  body.reduce-animations .text-gradient-animate,
+  body.reduce-animations .text-neon-animate {
+    animation: none !important;
+    background-position: 0% 50% !important;
+  }
+  
+  body.reduce-animations .sweep-light::after {
+    animation: none !important;
+  }
+  
+  body.reduce-animations .btn-ripple::before {
+    animation: none !important;
+  }
+  
+  body.reduce-animations .animate-particle-float,
+  body.reduce-animations .animate-glow-pulse,
+  body.reduce-animations .animate-morph {
+    animation: none !important;
+  }
+  
+  /* Simplify complex animations on low-end devices */
+  body.reduce-animations [class*="animate-"] {
+    animation-duration: 0.3s !important;
+    animation-iteration-count: 1 !important;
   }
   
   /* Scrollbar Styling */

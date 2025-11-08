@@ -70,7 +70,7 @@ export const generateRecommendations = async (user, progressData, allLessons) =>
     const userPreferences = user.preferences || {};
     const hasPreferences = userPreferences.onboardingCompleted;
     
-    const prompt = `You are an educational AI assistant for RuralLearn, a platform helping students in rural areas.
+    const prompt = `You are an educational AI assistant for EduAdapt, a platform helping students in rural areas with adaptive learning.
 
 User Profile:
 - Name: ${user.name}
@@ -91,22 +91,25 @@ ${availableLessons.slice(0, 10).map((lesson, idx) =>
   `${idx + 1}. ${lesson.title} (${lesson.difficulty}) - ${lesson.description || 'No description'}`
 ).join('\n')}
 
-Based on the user's progress, performance${hasPreferences ? ', and stated preferences' : ''}, recommend 3-5 lessons from the available lessons that would be most beneficial for their learning journey. Consider:
+Based on the user's progress, performance${hasPreferences ? ', and stated preferences' : ''}, recommend 3-5 lessons from the available lessons that would be most beneficial for their learning journey. 
+
+IMPORTANT: Provide actionable recommendations that encourage immediate learning. Consider:
 1. Their current skill level based on quiz scores
 2. Logical progression from completed lessons
 3. Difficulty level appropriate for their performance${hasPreferences ? ' and preferences' : ''}
 4. Variety in topics to maintain engagement${hasPreferences ? '\n5. Alignment with their learning goals and interests' : ''}
+6. Make the reason compelling and motivating to start learning NOW
 
 Provide your response in the following JSON format:
 {
   "recommendations": [
     {
       "lessonTitle": "exact lesson title from the list",
-      "reason": "brief explanation why this lesson is recommended",
+      "reason": "brief, compelling explanation why this lesson is recommended and why to start now (max 2 sentences)",
       "priority": "high/medium/low"
     }
   ],
-  "overallGuidance": "brief personalized message for the student"
+  "overallGuidance": "brief personalized, encouraging message for the student (1-2 sentences)"
 }`;
 
     const result = await model.generateContent(prompt);

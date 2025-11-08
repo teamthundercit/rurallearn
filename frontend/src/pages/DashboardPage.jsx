@@ -1,22 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useApi from '../utils/useApi';
 import { getUserProfile, getUserProgress, getLeaderboard } from '../services/api';
-import ProgressCard from '../components/ProgressCard';
-import RecommendationPanel from '../components/RecommendationPanel';
-import LearningStreak from '../components/LearningStreak';
-import AchievementBadges from '../components/AchievementBadges';
-import WeeklyActivityChart from '../components/WeeklyActivityChart';
-import QuickActions from '../components/QuickActions';
-import LearningGoalsProgress from '../components/LearningGoalsProgress';
-import RecentAchievements from '../components/RecentAchievements';
-import StudyReminders from '../components/StudyReminders';
-import Leaderboard from '../components/Leaderboard';
-import LanguageSwitcher from '../components/LanguageSwitcher';
-import MoodCheckModal from '../components/MoodCheckModal';
 import useMoodCheck from '../hooks/useMoodCheck';
+import { lazyRoutes } from '../App';
+import { preloadRoute } from '../utils/routePreloader';
+
+// Critical components - load immediately
+import StickyGlassHeader from '../components/StickyGlassHeader';
+import ProgressCard from '../components/ProgressCard';
+
+// Non-critical components - lazy load for better performance
+const RecommendationPanel = lazy(() => import('../components/RecommendationPanel'));
+const LearningStreak = lazy(() => import('../components/LearningStreak'));
+const AchievementBadges = lazy(() => import('../components/AchievementBadges'));
+const WeeklyActivityChart = lazy(() => import('../components/WeeklyActivityChart'));
+const QuickActions = lazy(() => import('../components/QuickActions'));
+const LearningGoalsProgress = lazy(() => import('../components/LearningGoalsProgress'));
+const RecentAchievements = lazy(() => import('../components/RecentAchievements'));
+const StudyReminders = lazy(() => import('../components/StudyReminders'));
+const Leaderboard = lazy(() => import('../components/Leaderboard'));
+const MoodCheckModal = lazy(() => import('../components/MoodCheckModal'));
 
 const DashboardPage = () => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
@@ -121,8 +127,8 @@ const DashboardPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+        <div className="text-center" role="status" aria-live="polite">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4" aria-hidden="true"></div>
           <p className="text-gray-600">Loading your dashboard...</p>
         </div>
       </div>
@@ -190,72 +196,29 @@ const DashboardPage = () => {
 
   return (
     <>
-      {/* MoodCheck Modal */}
-      <MoodCheckModal
-        isOpen={showMoodCheck}
-        onClose={() => setShowMoodCheck(false)}
-        onResult={handleMoodCheckResult}
-      />
+      {/* MoodCheck Modal - Lazy loaded */}
+      <Suspense fallback={null}>
+        <MoodCheckModal
+          isOpen={showMoodCheck}
+          onClose={() => setShowMoodCheck(false)}
+          onResult={handleMoodCheckResult}
+        />
+      </Suspense>
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-        {/* Modern Header with Glassmorphism */}
-        <header className="glass sticky top-0 z-50 border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-xl">🎓</span>
-              </div>
-              <h1 className="text-2xl font-display font-black text-gradient">EduAdapt</h1>
-            </div>
-            
-            {/* User Profile */}
-            <div className="flex items-center gap-4">
-              {/* Language Switcher */}
-              <LanguageSwitcher />
-              
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-gray-900">{displayUser?.name}</p>
-                <p className="text-xs text-gray-600">{displayUser?.email}</p>
-                {userData?.role && (
-                  <span className="badge-primary text-xs mt-1 inline-block">
-                    {userData.role}
-                  </span>
-                )}
-              </div>
-              
-              {(user?.picture || displayUser?.avatar) && (
-                <div className="relative">
-                  <img
-                    src={user?.picture || displayUser?.avatar}
-                    alt={displayUser?.name}
-                    className="h-12 w-12 rounded-full ring-4 ring-primary-100 hover:ring-primary-200 transition-all cursor-pointer"
-                  />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-success-500 rounded-full border-2 border-white"></div>
-                </div>
-              )}
-              
-              <button
-                onClick={handleLogout}
-                className="btn-secondary text-sm px-4 py-2"
-              >
-                <span className="hidden sm:inline">{t('common.logout')}</span>
-                <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+        {/* Sticky Glass Header */}
+        <StickyGlassHeader 
+          user={user}
+          displayUser={displayUser}
+          onLogout={handleLogout}
+        />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section with Animation */}
         <div className="mb-8 animate-slide-down">
-          <h2 className="text-4xl sm:text-5xl font-display font-black mb-3">
-            <span className="text-gray-900">{t('dashboard.title', { name: displayUser?.name?.split(' ')[0] || 'User' })}</span>
+          <h2 className="text-4xl sm:text-5xl font-display font-black text-gradient-animate mb-3">
+            <span>{t('dashboard.title', { name: displayUser?.name?.split(' ')[0] || 'User' })}</span>
             <span className="inline-block animate-bounce-slow ml-2">👋</span>
           </h2>
           <p className="text-gray-600 text-lg">
@@ -263,28 +226,41 @@ const DashboardPage = () => {
           </p>
         </div>
 
-        {/* Progress Cards with Animation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-scale-in">
+        {/* Holographic Progress Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" role="region" aria-label="Learning progress overview">
           <ProgressCard
             icon="📚"
             title={t('dashboard.lessonsCompleted')}
             value={metrics.completedLessons}
-            color="primary"
+            total={progressData?.progress?.length || 100}
+            color={{ from: 'cyan-400', to: 'blue-500' }}
             trend={5}
+            animation="scale"
           />
           <ProgressCard
-            icon="🎯"
-            title={t('dashboard.averageScore')}
-            value={`${metrics.averageScore}%`}
-            color="success"
-            trend={metrics.averageScore > 70 ? 3 : -2}
+            icon="🔥"
+            title="Study Streak"
+            value={`${userData?.gamification?.streak || 0} days`}
+            color={{ from: 'violet-400', to: 'fuchsia-500' }}
+            trend={userData?.gamification?.streak > 3 ? 8 : -2}
+            animation="pulse"
           />
           <ProgressCard
-            icon="⏱️"
-            title={t('dashboard.timeSpent')}
-            value={`${Math.round(metrics.totalTimeSpent)}m`}
-            color="accent"
-            trend={8}
+            icon="⭐"
+            title="Points Earned"
+            value={userData?.gamification?.totalPoints || 0}
+            color={{ from: 'amber-400', to: 'yellow-500' }}
+            trend={12}
+            animation="tilt"
+          />
+          <ProgressCard
+            icon="🏆"
+            title="Achievements"
+            value={userData?.gamification?.badges?.length || 0}
+            total={20}
+            color={{ from: 'emerald-400', to: 'teal-500' }}
+            trend={userData?.gamification?.badges?.length > 5 ? 10 : 0}
+            animation="scale"
           />
         </div>
 
@@ -292,60 +268,78 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
-            {/* AI Recommendations */}
-            <RecommendationPanel />
+            {/* AI Recommendations - Lazy loaded */}
+            <Suspense fallback={<div className="card h-64 animate-pulse" />}>
+              <RecommendationPanel />
+            </Suspense>
             
-            {/* Weekly Activity Chart */}
-            <WeeklyActivityChart weeklyData={progressData?.weeklyActivity} />
+            {/* Weekly Activity Chart - Lazy loaded */}
+            <Suspense fallback={<div className="card h-64 animate-pulse" />}>
+              <WeeklyActivityChart weeklyData={progressData?.weeklyActivity} />
+            </Suspense>
             
-            {/* Recent Achievements */}
-            <RecentAchievements achievements={progressData?.recentAchievements} />
+            {/* Recent Achievements - Lazy loaded */}
+            <Suspense fallback={<div className="card h-48 animate-pulse" />}>
+              <RecentAchievements achievements={progressData?.recentAchievements} />
+            </Suspense>
           </div>
           
           {/* Right Column */}
           <div className="space-y-8">
-            {/* Learning Streak */}
-            <LearningStreak streak={userData?.gamification?.streak} />
+            {/* Learning Streak - Lazy loaded */}
+            <Suspense fallback={<div className="card h-32 animate-pulse" />}>
+              <LearningStreak streak={userData?.gamification?.streak} />
+            </Suspense>
             
-            {/* Achievement Badges */}
-            <AchievementBadges 
-              badges={userData?.gamification?.badges} 
-              totalPoints={userData?.gamification?.totalPoints}
-            />
+            {/* Achievement Badges - Lazy loaded */}
+            <Suspense fallback={<div className="card h-48 animate-pulse" />}>
+              <AchievementBadges 
+                badges={userData?.gamification?.badges} 
+                totalPoints={userData?.gamification?.totalPoints}
+              />
+            </Suspense>
             
-            {/* Quick Actions */}
-            <QuickActions 
-              lastLesson={progressData?.lastLesson}
-              failedQuizzes={progressData?.failedQuizzes}
-              recommendations={progressData?.recommendations}
-            />
+            {/* Quick Actions - Lazy loaded */}
+            <Suspense fallback={<div className="card h-40 animate-pulse" />}>
+              <QuickActions 
+                lastLesson={progressData?.lastLesson}
+                failedQuizzes={progressData?.failedQuizzes}
+                recommendations={progressData?.recommendations}
+              />
+            </Suspense>
           </div>
         </div>
         
         {/* Second Row - Full Width Components */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Learning Goals Progress */}
-          <LearningGoalsProgress 
-            weeklyGoal={userData?.gamification?.weeklyGoal}
-            monthlyGoal={userData?.gamification?.monthlyGoal}
-            weeklyProgress={progressData?.weeklyProgress}
-            monthlyProgress={progressData?.monthlyProgress}
-          />
+          {/* Learning Goals Progress - Lazy loaded */}
+          <Suspense fallback={<div className="card h-48 animate-pulse" />}>
+            <LearningGoalsProgress 
+              weeklyGoal={userData?.gamification?.weeklyGoal}
+              monthlyGoal={userData?.gamification?.monthlyGoal}
+              weeklyProgress={progressData?.weeklyProgress}
+              monthlyProgress={progressData?.monthlyProgress}
+            />
+          </Suspense>
           
-          {/* Study Reminders */}
-          <StudyReminders 
-            nextLessons={progressData?.nextLessons}
-            reviewLessons={progressData?.reviewLessons}
-          />
+          {/* Study Reminders - Lazy loaded */}
+          <Suspense fallback={<div className="card h-48 animate-pulse" />}>
+            <StudyReminders 
+              nextLessons={progressData?.nextLessons}
+              reviewLessons={progressData?.reviewLessons}
+            />
+          </Suspense>
         </div>
         
-        {/* Third Row - Leaderboard */}
+        {/* Third Row - Leaderboard - Lazy loaded */}
         <div className="mb-8">
-          <Leaderboard 
-            userRank={leaderboardData?.userRank || progressData?.userRank}
-            userPoints={userData?.gamification?.totalPoints}
-            topLearners={leaderboardData?.topLearners || progressData?.topLearners}
-          />
+          <Suspense fallback={<div className="card h-64 animate-pulse" />}>
+            <Leaderboard 
+              userRank={leaderboardData?.userRank || progressData?.userRank}
+              userPoints={userData?.gamification?.totalPoints}
+              topLearners={leaderboardData?.topLearners || progressData?.topLearners}
+            />
+          </Suspense>
         </div>
 
         {/* Call to Action with Gradient */}
@@ -354,7 +348,7 @@ const DashboardPage = () => {
           
           <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex-1">
-              <h3 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 mb-2 flex items-center gap-2">
+              <h3 className="text-2xl sm:text-3xl font-display font-bold text-gradient-animate mb-2 flex items-center gap-2">
                 <span>{t('dashboard.readyToLearn')}</span>
                 <span className="text-3xl animate-bounce-slow">🚀</span>
               </h3>
@@ -366,6 +360,8 @@ const DashboardPage = () => {
             </div>
             <button
               onClick={() => navigate('/lessons')}
+              onMouseEnter={() => preloadRoute(lazyRoutes.LessonsListPage, 'LessonsListPage')}
+              onFocus={() => preloadRoute(lazyRoutes.LessonsListPage, 'LessonsListPage')}
               className="btn-primary text-lg group/btn whitespace-nowrap"
             >
               <span className="flex items-center gap-2">

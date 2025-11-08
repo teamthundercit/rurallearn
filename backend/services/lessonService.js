@@ -15,9 +15,12 @@ export const getLessons = async (filters = {}, options = {}) => {
     }
     
     if (tags) {
-      // Support both single tag and array of tags
+      // Support both single tag and array of tags with case-insensitive matching
       const tagArray = Array.isArray(tags) ? tags : [tags];
-      query.tags = { $in: tagArray };
+      // Use regex for case-insensitive partial matching
+      query.tags = { 
+        $in: tagArray.map(tag => new RegExp(tag, 'i'))
+      };
     }
     
     // Calculate pagination

@@ -19,6 +19,8 @@ const LessonPage = () => {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [startTime] = useState(Date.now());
   const [toast, setToast] = useState(null);
+  const [contentSections, setContentSections] = useState([]);
+  const [currentSection, setCurrentSection] = useState(0);
   
   const lessonContentRef = useRef(null);
 
@@ -44,7 +46,24 @@ const LessonPage = () => {
         });
 
         const response = await getLessonById(token, lessonId);
-        setLesson(response.data?.lesson || response.lesson);
+        const lessonData = response.data?.lesson || response.lesson;
+        setLesson(lessonData);
+        
+        // Split text content into sections for better learning experience
+        if (lessonData?.content?.text) {
+          const paragraphs = lessonData.content.text.split('\n').filter(p => p.trim());
+          const sections = [];
+          
+          // Group paragraphs into sections (3-4 paragraphs per section)
+          for (let i = 0; i < paragraphs.length; i += 3) {
+            sections.push({
+              content: paragraphs.slice(i, i + 3).join('\n'),
+              completed: false
+            });
+          }
+          
+          setContentSections(sections);
+        }
       } catch (err) {
         console.error('Error loading lesson:', err);
         setError(err.message || 'Failed to load lesson. Please try again.');
@@ -55,6 +74,20 @@ const LessonPage = () => {
 
     fetchLesson();
   }, [lessonId, getAccessTokenSilently]);
+
+  const handleNextSection = () => {
+    if (currentSection < contentSections.length - 1) {
+      setCurrentSection(currentSection + 1);
+      lessonContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handlePreviousSection = () => {
+    if (currentSection > 0) {
+      setCurrentSection(currentSection - 1);
+      lessonContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const handleCompleteLesson = async () => {
     try {
@@ -239,7 +272,7 @@ const LessonPage = () => {
             ))}
           </div>
           
-          <h1 className="text-4xl sm:text-5xl font-display font-black text-gray-900 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-display font-black text-gradient-animate mb-4">
             {lesson.title}
           </h1>
           
@@ -247,6 +280,38 @@ const LessonPage = () => {
             <p className="text-lg text-gray-600 leading-relaxed">
               {lesson.description}
             </p>
+          )}
+
+          {/* Content Attribution */}
+          {lesson.source && lesson.source.name !== 'Original' && (
+            <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">📚</span>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-blue-900 mb-1">
+                    Content Source
+                  </p>
+                  <p className="text-sm text-blue-800">
+                    {lesson.source.attribution}
+                  </p>
+                  {lesson.source.url && (
+                    <a
+                      href={lesson.source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-800 underline mt-1 inline-block"
+                    >
+                      View original source →
+                    </a>
+                  )}
+                  {lesson.source.license && (
+                    <p className="text-xs text-blue-700 mt-1">
+                      License: {lesson.source.license}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
@@ -272,16 +337,83 @@ const LessonPage = () => {
             </div>
           )}
 
-          {/* Text Content - Fixed rendering issue */}
+          {/* Text Content - Sectioned for better learning */}
           {(lesson.content?.type === 'text' || lesson.content?.type === 'mixed') && lesson.content?.text && (
             <div className="prose prose-lg max-w-none">
-              <div className="text-gray-800 leading-relaxed">
-                {lesson.content.text.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-4">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+              {contentSections.length > 1 ? (
+                <>
+                  {/* Progress indicator */}
+                  <div className="mb-6 p-4 bg-primary-50 rounded-lg border border-primary-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-primary-900">
+                        Section {currentSection + 1} of {contentSections.length}
+                      </span>
+                      <span className="text-sm text-primary-700">
+                        {Math.round(((currentSection + 1) / contentSections.length) * 100)}% Complete
+                      </span>
+                    </div>
+                    <div className="w-full bg-primary-200 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${((currentSection + 1) / contentSections.length) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  {/* Current section content */}
+                  <div className="text-gray-800 leading-relaxed mb-6">
+                    {contentSections[currentSection].content.split('\n').map((paragraph, index) => (
+                      <p key={index} className="mb-4">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+
+                  {/* Navigation buttons */}
+                  <div className="flex gap-3 justify-between items-center pt-4 border-t border-gray-200">
+                    <button
+                      onClick={handlePreviousSection}
+                      disabled={currentSection === 0}
+                      className={`btn-secondary flex items-center gap-2 ${
+                        currentSection === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Previous
+                    </button>
+
+                    {currentSection < contentSections.length - 1 ? (
+                      <button
+                        onClick={handleNextSection}
+                        className="btn-primary flex items-center gap-2"
+                      >
+                        Next Section
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    ) : (
+                      <div className="text-sm text-success-600 font-medium flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        All sections completed!
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                // Single section - show all content
+                <div className="text-gray-800 leading-relaxed">
+                  {lesson.content.text.split('\n').map((paragraph, index) => (
+                    <p key={index} className="mb-4">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

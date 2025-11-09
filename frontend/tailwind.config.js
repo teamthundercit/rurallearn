@@ -57,6 +57,7 @@ export default {
         },
         // Midnight background palette
         midnight: {
+          950: '#050711',
           900: '#0a0e27',
           800: '#131729',
           700: '#1a1f3a',

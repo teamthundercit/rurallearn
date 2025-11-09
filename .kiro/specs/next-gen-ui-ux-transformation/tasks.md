@@ -256,6 +256,7 @@
 
 
 
+
   - [x] 7.1 Enable GPU acceleration for all animated elements
 
 

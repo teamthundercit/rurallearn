@@ -57,7 +57,7 @@ const ProgressCard = ({
 
   return (
     <motion.div
-      className="glass-neon-blue p-6 sweep-light hover-lift group cursor-pointer gpu-accelerated"
+      className="glass-neon-blue p-5 rounded-xl hover:shadow-lg transition-all duration-200 cursor-pointer border border-white/10"
       {...motionProps}
       onClick={onClick}
       onKeyDown={(e) => {
@@ -72,23 +72,27 @@ const ProgressCard = ({
     >
       {/* Icon Container with Gradient Background */}
       <motion.div
-        className={`w-16 h-16 rounded-2xl bg-gradient-to-br from-${color.from} to-${color.to} 
-                    flex items-center justify-center text-3xl mb-4 shadow-neon-blue gpu-accelerated`}
+        className={`w-12 h-12 rounded-lg bg-gradient-to-br from-${color.from} to-${color.to} 
+                    flex items-center justify-center mb-3`}
         animate={prefersReducedMotion ? {} : iconAnimations[animation]}
       >
-        {icon}
+        {typeof icon === 'string' ? (
+          <span className="text-2xl">{icon}</span>
+        ) : (
+          <div className="text-white">{icon}</div>
+        )}
       </motion.div>
       
       {/* Title and Trend Badge */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xl font-bold text-white">{title}</h3>
+        <h3 className="text-sm font-semibold text-gray-300">{title}</h3>
         {trend && <TrendBadge trend={trend} />}
       </div>
       
       {/* Value Display */}
-      <div className="text-3xl font-black text-neon-animate mb-4">
+      <div className="text-2xl font-bold text-white mb-2">
         {value}
-        {total && <span className="text-lg text-gray-400">/{total}</span>}
+        {total && <span className="text-sm text-gray-400 ml-1">/ {total}</span>}
       </div>
       
       {/* Progress Bar (if total is provided) */}

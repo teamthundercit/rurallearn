@@ -20,7 +20,7 @@ const StickyGlassHeader = ({ user, displayUser, onLogout }) => {
           </motion.div>
           
           {/* Vertical Divider */}
-          <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent" />
+          <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-600 to-transparent" />
           
           <WelcomeMessage name={displayUser?.name?.split(' ')[0] || 'User'} />
         </div>
@@ -31,8 +31,8 @@ const StickyGlassHeader = ({ user, displayUser, onLogout }) => {
           <LanguageSwitcher />
           
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-gray-900">{displayUser?.name}</p>
-            <p className="text-xs text-gray-600">{displayUser?.email}</p>
+            <p className="text-sm font-semibold text-white">{displayUser?.name}</p>
+            <p className="text-xs text-gray-400">{displayUser?.email}</p>
             {displayUser?.role && (
               <span className="badge-primary text-xs mt-1 inline-block">
                 {displayUser.role}
@@ -45,15 +45,15 @@ const StickyGlassHeader = ({ user, displayUser, onLogout }) => {
               <img
                 src={user?.picture || displayUser?.avatar}
                 alt={displayUser?.name}
-                className="h-12 w-12 rounded-full ring-4 ring-primary-100 hover:ring-primary-200 transition-all cursor-pointer"
+                className="h-12 w-12 rounded-full ring-4 ring-blue-500/30 hover:ring-blue-400/50 transition-all cursor-pointer"
               />
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-success-500 rounded-full border-2 border-white"></div>
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-success-500 rounded-full border-2 border-midnight-900"></div>
             </div>
           )}
           
           <button
             onClick={onLogout}
-            className="btn-secondary text-sm px-4 py-2"
+            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-lg text-sm transition-all"
           >
             <span className="hidden sm:inline">Logout</span>
             <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">

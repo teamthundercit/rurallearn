@@ -2,6 +2,7 @@ import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { BookOpen, Flame, Star, Trophy } from 'lucide-react';
 import useApi from '../utils/useApi';
 import { getUserProfile, getUserProgress, getLeaderboard } from '../services/api';
 import useMoodCheck from '../hooks/useMoodCheck';
@@ -11,6 +12,7 @@ import { preloadRoute } from '../utils/routePreloader';
 // Critical components - load immediately
 import StickyGlassHeader from '../components/StickyGlassHeader';
 import ProgressCard from '../components/ProgressCard';
+import AttractiveSpinner from '../components/AttractiveSpinner';
 
 // Non-critical components - lazy load for better performance
 const RecommendationPanel = lazy(() => import('../components/RecommendationPanel'));
@@ -126,10 +128,9 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center" role="status" aria-live="polite">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4" aria-hidden="true"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
+      <div className="min-h-screen flex items-center justify-center bg-midnight-900">
+        <div role="status" aria-live="polite">
+          <AttractiveSpinner size="lg" text="Loading your dashboard..." />
         </div>
       </div>
     );
@@ -137,13 +138,13 @@ const DashboardPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center p-8 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-700 mb-4">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-midnight-900">
+        <div className="text-center p-8 glass-neon-blue rounded-xl border border-white/10">
+          <h2 className="text-2xl font-bold text-red-400 mb-4">Error</h2>
+          <p className="text-gray-300 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Retry
           </button>
@@ -205,7 +206,7 @@ const DashboardPage = () => {
         />
       </Suspense>
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+      <div className="min-h-screen bg-midnight-900 transition-colors duration-300">
         {/* Sticky Glass Header */}
         <StickyGlassHeader 
           user={user}
@@ -213,23 +214,22 @@ const DashboardPage = () => {
           onLogout={handleLogout}
         />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section with Animation */}
-        <div className="mb-8 animate-slide-down">
-          <h2 className="text-4xl sm:text-5xl font-display font-black text-gradient-animate mb-3">
-            <span>{t('dashboard.title', { name: displayUser?.name?.split(' ')[0] || 'User' })}</span>
-            <span className="inline-block animate-bounce-slow ml-2">👋</span>
-          </h2>
-          <p className="text-gray-600 text-lg">
+      {/* Main Content - Midnight Theme */}
+      <main className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
+        {/* Welcome Section */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-white mb-1">
+            {t('dashboard.title', { name: displayUser?.name?.split(' ')[0] || 'User' })} 👋
+          </h1>
+          <p className="text-gray-400 text-sm">
             {t('dashboard.subtitle')}
           </p>
         </div>
 
-        {/* Holographic Progress Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" role="region" aria-label="Learning progress overview">
+        {/* Stats Cards - With Icons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" role="region" aria-label="Learning progress overview">
           <ProgressCard
-            icon="📚"
+            icon={<BookOpen className="w-6 h-6" strokeWidth={2} />}
             title={t('dashboard.lessonsCompleted')}
             value={metrics.completedLessons}
             total={progressData?.progress?.length || 100}
@@ -238,7 +238,7 @@ const DashboardPage = () => {
             animation="scale"
           />
           <ProgressCard
-            icon="🔥"
+            icon={<Flame className="w-6 h-6" strokeWidth={2} />}
             title="Study Streak"
             value={`${userData?.gamification?.streak || 0} days`}
             color={{ from: 'violet-400', to: 'fuchsia-500' }}
@@ -246,7 +246,7 @@ const DashboardPage = () => {
             animation="pulse"
           />
           <ProgressCard
-            icon="⭐"
+            icon={<Star className="w-6 h-6" strokeWidth={2} />}
             title="Points Earned"
             value={userData?.gamification?.totalPoints || 0}
             color={{ from: 'amber-400', to: 'yellow-500' }}
@@ -254,7 +254,7 @@ const DashboardPage = () => {
             animation="tilt"
           />
           <ProgressCard
-            icon="🏆"
+            icon={<Trophy className="w-6 h-6" strokeWidth={2} />}
             title="Achievements"
             value={userData?.gamification?.badges?.length || 0}
             total={20}
@@ -264,95 +264,125 @@ const DashboardPage = () => {
           />
         </div>
 
-        {/* Enhanced Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* AI Recommendations - Lazy loaded */}
-            <Suspense fallback={<div className="card h-64 animate-pulse" />}>
+        {/* Main Layout: Content + Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+          {/* MAIN CONTENT AREA (3/4 width) */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* AI Recommendations - Primary Feature */}
+            <Suspense fallback={
+              <div className="glass-neon-blue rounded-xl h-64 border border-white/10 flex items-center justify-center">
+                <AttractiveSpinner size="md" text="" />
+              </div>
+            }>
               <RecommendationPanel />
             </Suspense>
             
-            {/* Weekly Activity Chart - Lazy loaded */}
-            <Suspense fallback={<div className="card h-64 animate-pulse" />}>
+            {/* Weekly Activity Chart */}
+            <Suspense fallback={
+              <div className="glass-neon-blue rounded-xl h-64 border border-white/10 flex items-center justify-center">
+                <AttractiveSpinner size="md" text="" />
+              </div>
+            }>
               <WeeklyActivityChart weeklyData={progressData?.weeklyActivity} />
             </Suspense>
             
-            {/* Recent Achievements - Lazy loaded */}
-            <Suspense fallback={<div className="card h-48 animate-pulse" />}>
+            {/* Learning Goals Progress */}
+            <Suspense fallback={
+              <div className="glass-neon-blue rounded-xl h-48 border border-white/10 flex items-center justify-center">
+                <AttractiveSpinner size="md" text="" />
+              </div>
+            }>
+              <LearningGoalsProgress 
+                weeklyGoal={userData?.gamification?.weeklyGoal}
+                monthlyGoal={userData?.gamification?.monthlyGoal}
+                weeklyProgress={progressData?.weeklyProgress}
+                monthlyProgress={progressData?.monthlyProgress}
+              />
+            </Suspense>
+            
+            {/* Recent Achievements */}
+            <Suspense fallback={
+              <div className="glass-neon-blue rounded-xl h-48 border border-white/10 flex items-center justify-center">
+                <AttractiveSpinner size="md" text="" />
+              </div>
+            }>
               <RecentAchievements achievements={progressData?.recentAchievements} />
             </Suspense>
-          </div>
-          
-          {/* Right Column */}
-          <div className="space-y-8">
-            {/* Learning Streak - Lazy loaded */}
-            <Suspense fallback={<div className="card h-32 animate-pulse" />}>
-              <LearningStreak streak={userData?.gamification?.streak} />
-            </Suspense>
             
-            {/* Achievement Badges - Lazy loaded */}
-            <Suspense fallback={<div className="card h-48 animate-pulse" />}>
-              <AchievementBadges 
-                badges={userData?.gamification?.badges} 
-                totalPoints={userData?.gamification?.totalPoints}
-              />
-            </Suspense>
-            
-            {/* Quick Actions - Lazy loaded */}
-            <Suspense fallback={<div className="card h-40 animate-pulse" />}>
-              <QuickActions 
-                lastLesson={progressData?.lastLesson}
-                failedQuizzes={progressData?.failedQuizzes}
-                recommendations={progressData?.recommendations}
+            {/* Leaderboard */}
+            <Suspense fallback={
+              <div className="glass-neon-blue rounded-xl h-64 border border-white/10 flex items-center justify-center">
+                <AttractiveSpinner size="md" text="" />
+              </div>
+            }>
+              <Leaderboard 
+                userRank={leaderboardData?.userRank || progressData?.userRank}
+                userPoints={userData?.gamification?.totalPoints}
+                topLearners={leaderboardData?.topLearners || progressData?.topLearners}
               />
             </Suspense>
           </div>
-        </div>
-        
-        {/* Second Row - Full Width Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Learning Goals Progress - Lazy loaded */}
-          <Suspense fallback={<div className="card h-48 animate-pulse" />}>
-            <LearningGoalsProgress 
-              weeklyGoal={userData?.gamification?.weeklyGoal}
-              monthlyGoal={userData?.gamification?.monthlyGoal}
-              weeklyProgress={progressData?.weeklyProgress}
-              monthlyProgress={progressData?.monthlyProgress}
-            />
-          </Suspense>
           
-          {/* Study Reminders - Lazy loaded */}
-          <Suspense fallback={<div className="card h-48 animate-pulse" />}>
-            <StudyReminders 
-              nextLessons={progressData?.nextLessons}
-              reviewLessons={progressData?.reviewLessons}
-            />
-          </Suspense>
-        </div>
-        
-        {/* Third Row - Leaderboard - Lazy loaded */}
-        <div className="mb-8">
-          <Suspense fallback={<div className="card h-64 animate-pulse" />}>
-            <Leaderboard 
-              userRank={leaderboardData?.userRank || progressData?.userRank}
-              userPoints={userData?.gamification?.totalPoints}
-              topLearners={leaderboardData?.topLearners || progressData?.topLearners}
-            />
-          </Suspense>
+          {/* SIDEBAR (1/4 width) */}
+          <div className="space-y-6">
+            <div className="lg:sticky lg:top-24 space-y-6">
+              {/* Learning Streak */}
+              <Suspense fallback={
+                <div className="glass-neon-blue rounded-xl h-32 border border-white/10 flex items-center justify-center">
+                  <AttractiveSpinner size="sm" text="" />
+                </div>
+              }>
+                <LearningStreak streak={userData?.gamification?.streak} />
+              </Suspense>
+              
+              {/* Achievement Badges */}
+              <Suspense fallback={
+                <div className="glass-neon-blue rounded-xl h-48 border border-white/10 flex items-center justify-center">
+                  <AttractiveSpinner size="sm" text="" />
+                </div>
+              }>
+                <AchievementBadges 
+                  badges={userData?.gamification?.badges} 
+                  totalPoints={userData?.gamification?.totalPoints}
+                />
+              </Suspense>
+              
+              {/* Quick Actions */}
+              <Suspense fallback={
+                <div className="glass-neon-blue rounded-xl h-40 border border-white/10 flex items-center justify-center">
+                  <AttractiveSpinner size="sm" text="" />
+                </div>
+              }>
+                <QuickActions 
+                  lastLesson={progressData?.lastLesson}
+                  failedQuizzes={progressData?.failedQuizzes}
+                  recommendations={progressData?.recommendations}
+                />
+              </Suspense>
+              
+              {/* Study Reminders */}
+              <Suspense fallback={
+                <div className="glass-neon-blue rounded-xl h-48 border border-white/10 flex items-center justify-center">
+                  <AttractiveSpinner size="sm" text="" />
+                </div>
+              }>
+                <StudyReminders 
+                  nextLessons={progressData?.nextLessons}
+                  reviewLessons={progressData?.reviewLessons}
+                />
+              </Suspense>
+            </div>
+          </div>
         </div>
 
-        {/* Call to Action with Gradient */}
-        <div className="card-gradient p-8 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-secondary-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          
-          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex-1">
-              <h3 className="text-2xl sm:text-3xl font-display font-bold text-gradient-animate mb-2 flex items-center gap-2">
-                <span>{t('dashboard.readyToLearn')}</span>
-                <span className="text-3xl animate-bounce-slow">🚀</span>
+        {/* CTA Card - Midnight Theme */}
+        <div className="glass-neon-blue rounded-xl p-6 border border-white/10 hover:border-blue-400/30 transition-all duration-300">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex-1 text-center sm:text-left">
+              <h3 className="text-xl font-bold text-white mb-1">
+                {t('dashboard.readyToLearn')} 🚀
               </h3>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-300 text-sm">
                 {progressData?.progress && progressData.progress.length > 0
                   ? t('dashboard.continueJourney')
                   : t('dashboard.startJourney')}
@@ -362,14 +392,9 @@ const DashboardPage = () => {
               onClick={() => navigate('/lessons')}
               onMouseEnter={() => preloadRoute(lazyRoutes.LessonsListPage, 'LessonsListPage')}
               onFocus={() => preloadRoute(lazyRoutes.LessonsListPage, 'LessonsListPage')}
-              className="btn-primary text-lg group/btn whitespace-nowrap"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg whitespace-nowrap"
             >
-              <span className="flex items-center gap-2">
-                {t('dashboard.browseLessons')}
-                <svg className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </span>
+              {t('dashboard.browseLessons')} →
             </button>
           </div>
         </div>

@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import OfflineIndicator from './components/OfflineIndicator';
 import { useOffline } from './hooks/useOffline';
 import usePerformanceMonitor from './hooks/usePerformanceMonitor';
+import { ThemeProvider } from './context/ThemeContext';
 
 /**
  * Code Splitting Strategy:
@@ -117,7 +118,9 @@ function App() {
   return (
     <Router>
       <Auth0ProviderWithHistory>
-        <AppContent />
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
       </Auth0ProviderWithHistory>
     </Router>
   );

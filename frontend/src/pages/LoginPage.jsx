@@ -46,17 +46,17 @@ const LoginPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-midnight-900">
+      <div className="min-h-screen flex items-center justify-center bg-midnight-900 dark:bg-gray-950">
         <div className="text-center" role="status" aria-live="polite">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4" aria-hidden="true"></div>
-          <p className="text-gray-400">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 dark:border-blue-500 mx-auto mb-4" aria-hidden="true"></div>
+          <p className="text-gray-400 dark:text-gray-500">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-midnight-900 px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-midnight-900 dark:bg-gray-950 px-4 py-12 relative overflow-hidden">
       {/* Lazy load Particle Background with Suspense */}
       <Suspense fallback={<div className="absolute inset-0 bg-midnight-900" />}>
         <ParticleBackground />
@@ -68,7 +68,7 @@ const LoginPage = () => {
           <Suspense fallback={<div className="h-20" />}>
             <AnimatedLogo />
           </Suspense>
-          <p className="text-gray-400 text-lg font-medium mt-4">
+          <p className="text-gray-400 text-lg mt-4" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>
             Personalized adaptive learning powered by AI
           </p>
         </div>

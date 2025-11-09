@@ -3,21 +3,21 @@ import React from 'react';
 const WeeklyActivityChart = ({ weeklyData }) => {
   if (!weeklyData || weeklyData.length === 0) {
     return (
-      <div className="card-gradient p-6 animate-scale-in">
+      <div className="glass-neon-blue p-6 animate-scale-in border border-white/10 rounded-xl">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center shadow-glow">
             <span className="text-2xl">📈</span>
           </div>
           <div>
-            <h3 className="text-xl font-display font-bold text-gray-900">
+            <h3 className="text-xl font-display font-bold text-white">
               Weekly Activity
             </h3>
-            <p className="text-sm text-gray-600">Your learning pattern this week</p>
+            <p className="text-sm text-gray-400">Your learning pattern this week</p>
           </div>
         </div>
         <div className="text-center py-8">
           <span className="text-6xl mb-4 block opacity-50">📊</span>
-          <p className="text-gray-500">Start learning to see your activity chart!</p>
+          <p className="text-gray-400">Start learning to see your activity chart!</p>
         </div>
       </div>
     );
@@ -28,21 +28,21 @@ const WeeklyActivityChart = ({ weeklyData }) => {
   const totalTime = weeklyData.reduce((sum, d) => sum + d.timeSpent, 0);
 
   return (
-    <div className="card-gradient p-6 animate-scale-in">
+    <div className="glass-neon-blue p-6 animate-scale-in border border-white/10 rounded-xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-2xl flex items-center justify-center shadow-glow">
             <span className="text-2xl">📈</span>
           </div>
           <div>
-            <h3 className="text-xl font-display font-bold text-gray-900">
+            <h3 className="text-xl font-display font-bold text-white">
               Weekly Activity
             </h3>
-            <p className="text-sm text-gray-600">{totalLessons} lessons this week</p>
+            <p className="text-sm text-gray-400">{totalLessons} lessons this week</p>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold text-primary-600">
+          <div className="text-lg font-bold text-blue-400">
             {Math.round(totalTime)}m
           </div>
           <div className="text-xs text-gray-500">total time</div>

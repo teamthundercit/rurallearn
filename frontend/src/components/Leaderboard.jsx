@@ -31,42 +31,42 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
   };
 
   return (
-    <div className="card-gradient p-6 animate-scale-in">
+    <div className="glass-neon-blue p-6 animate-scale-in border border-white/10 rounded-xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-glow">
             <span className="text-2xl">🏅</span>
           </div>
           <div>
-            <h3 className="text-xl font-display font-bold text-gray-900">
+            <h3 className="text-xl font-display font-bold text-white">
               Leaderboard
             </h3>
-            <p className="text-sm text-gray-600">See how you rank among learners</p>
+            <p className="text-sm text-gray-400">See how you rank among learners</p>
           </div>
         </div>
         <select
           value={timeframe}
           onChange={(e) => setTimeframe(e.target.value)}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          className="text-sm border border-white/20 bg-white/5 text-white rounded-lg px-3 py-1 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
         >
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
-          <option value="all">All Time</option>
+          <option value="week" className="bg-midnight-800">This Week</option>
+          <option value="month" className="bg-midnight-800">This Month</option>
+          <option value="all" className="bg-midnight-800">All Time</option>
         </select>
       </div>
 
       {/* Your Rank */}
-      <div className="glass p-4 rounded-xl mb-4 border-2 border-primary-200">
+      <div className="bg-white/5 p-4 rounded-xl mb-4 border-2 border-blue-500/30">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 bg-gradient-to-br ${getRankColor(currentUserRank)} rounded-xl flex items-center justify-center shadow-md`}>
             <span className="text-lg">{getRankIcon(currentUserRank)}</span>
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-gray-900">Your Rank: #{currentUserRank}</span>
-              <span className="badge badge-primary">{currentUserPoints} pts</span>
+              <span className="font-bold text-white">Your Rank: #{currentUserRank}</span>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300">{currentUserPoints} pts</span>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               {currentUserRank <= 10 ? 'Great job! You\'re in the top 10!' : 'Keep learning to climb higher!'}
             </p>
           </div>
@@ -75,14 +75,14 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
 
       {/* Top Learners */}
       <div className="space-y-2">
-        <h4 className="font-bold text-gray-900 mb-3">Top Learners</h4>
+        <h4 className="font-bold text-white mb-3">Top Learners</h4>
         {leaderboardData.slice(0, 5).map((learner, index) => (
           <div
             key={index}
             className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
               learner.rank <= 3
-                ? 'glass border-2 border-accent-200'
-                : 'bg-gray-50 hover:bg-gray-100'
+                ? 'bg-white/10 border-2 border-yellow-500/30'
+                : 'bg-white/5 hover:bg-white/10'
             }`}
           >
             <div className={`w-8 h-8 bg-gradient-to-br ${getRankColor(learner.rank)} rounded-lg flex items-center justify-center text-sm font-bold text-white`}>
@@ -90,14 +90,14 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-900">{learner.name}</span>
+                <span className="font-semibold text-white">{learner.name}</span>
                 {learner.streak > 0 && (
-                  <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                  <span className="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded-full">
                     🔥 {learner.streak}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-600">{learner.points} points</p>
+              <p className="text-sm text-gray-400">{learner.points} points</p>
             </div>
             <span className="text-2xl">{learner.badge}</span>
           </div>

@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { BookOpen, Bot, Wifi } from 'lucide-react';
+
+const iconMap = {
+  '📚': BookOpen,
+  '🤖': Bot,
+  '📱': Wifi,
+};
 
 const FeatureTile = ({ icon, title, description, onClick }) => {
+  const IconComponent = iconMap[icon] || BookOpen;
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -34,7 +42,9 @@ const FeatureTile = ({ icon, title, description, onClick }) => {
       role="button"
       aria-label={`${title}: ${description}`}
     >
-      <div className="text-4xl mb-3" aria-hidden="true">{icon}</div>
+      <div className="mb-3" aria-hidden="true">
+        <IconComponent className="w-10 h-10 text-blue-400" strokeWidth={1.5} />
+      </div>
       <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
       <p className="text-gray-300 text-sm">{description}</p>
     </motion.div>

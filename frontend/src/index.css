@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,6 +8,10 @@
   body {
     @apply bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 text-gray-900 font-sans;
     min-height: 100vh;
+  }
+  
+  [data-theme='dark'] body {
+    @apply bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800 text-gray-100;
   }
   
   * {
@@ -23,10 +27,18 @@
            shadow-lg hover:shadow-xl hover:scale-105 font-medium btn-ripple;
   }
   
+  [data-theme='dark'] .btn-primary {
+    @apply from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700;
+  }
+  
   .btn-secondary {
     @apply bg-white text-primary-600 px-6 py-3 rounded-xl border-2 border-primary-600 
            hover:bg-primary-50 transition-all duration-300 shadow-md hover:shadow-lg 
            hover:scale-105 font-medium btn-ripple;
+  }
+  
+  [data-theme='dark'] .btn-secondary {
+    @apply bg-gray-800 text-blue-400 border-blue-500 hover:bg-gray-700;
   }
   
   .btn-accent {
@@ -35,25 +47,46 @@
            shadow-lg hover:shadow-xl hover:scale-105 font-medium btn-ripple;
   }
   
-  /* Modern Cards */
+  /* Modern Cards - OptimaUI Style with Better Contrast */
   .card {
-    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 
-           hover:shadow-2xl transition-all duration-300 border border-gray-100;
+    @apply bg-white rounded-xl shadow-sm p-5 
+           hover:shadow-md transition-all duration-200 border border-gray-200;
+  }
+  
+  [data-theme='dark'] .card {
+    @apply bg-gray-900 border-gray-800 shadow-none;
+  }
+  
+  /* Ensure text is always visible in cards */
+  .card * {
+    color: inherit;
   }
   
   .card-gradient {
-    @apply bg-gradient-to-br from-white to-primary-50/30 backdrop-blur-sm rounded-2xl 
-           shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-primary-100;
+    @apply bg-white rounded-xl shadow-sm p-5 
+           hover:shadow-md transition-all duration-200 border border-gray-200;
+  }
+  
+  [data-theme='dark'] .card-gradient {
+    @apply bg-gray-900 border-gray-800 shadow-none;
   }
   
   .card-glow {
-    @apply bg-white rounded-2xl shadow-glow p-6 hover:shadow-glow-lg 
-           transition-all duration-300 border border-primary-200;
+    @apply bg-white rounded-xl shadow-sm p-5 
+           hover:shadow-md transition-all duration-200 border border-gray-200;
+  }
+  
+  [data-theme='dark'] .card-glow {
+    @apply bg-gray-900 border-gray-800 shadow-none;
   }
   
   /* Glassmorphism */
   .glass {
     @apply bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-white/20;
+  }
+  
+  [data-theme='dark'] .glass {
+    @apply bg-gray-900/70 border-gray-700/20;
   }
   
   .glass-dark {
@@ -66,9 +99,17 @@
            bg-clip-text text-transparent font-bold;
   }
   
+  [data-theme='dark'] .text-gradient {
+    @apply bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400;
+  }
+  
   .text-gradient-animate {
     @apply bg-gradient-to-r from-primary-600 via-purple-600 to-secondary-600 
            bg-clip-text text-transparent font-bold bg-300% animate-gradient;
+  }
+  
+  [data-theme='dark'] .text-gradient-animate {
+    @apply bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400;
   }
   
   /* Input Fields */
@@ -76,6 +117,10 @@
     @apply w-full px-4 py-3 rounded-xl border-2 border-gray-200 
            focus:border-primary-500 focus:ring-4 focus:ring-primary-100 
            transition-all duration-300 bg-white/50 backdrop-blur-sm;
+  }
+  
+  [data-theme='dark'] .input-modern {
+    @apply border-gray-700 bg-gray-800/50 text-gray-100 focus:ring-primary-900;
   }
   
   /* Badges */
@@ -126,12 +171,24 @@
            shadow-glass hover:shadow-glass-lg transition-all duration-500;
   }
   
+  [data-theme='dark'] .glass-neon {
+    @apply bg-gray-800/30 border-gray-700/30;
+  }
+  
   .glass-neon-blue {
     @apply glass-neon hover:shadow-neon-blue hover:border-blue-400/30;
   }
   
+  [data-theme='dark'] .glass-neon-blue {
+    @apply hover:border-blue-500/50;
+  }
+  
   .glass-neon-violet {
     @apply glass-neon hover:shadow-neon-violet hover:border-violet-400/30;
+  }
+  
+  [data-theme='dark'] .glass-neon-violet {
+    @apply hover:border-violet-500/50;
   }
   
   /* Animated Gradient Text */
@@ -216,10 +273,16 @@
     backdrop-filter: blur(12px);
   }
   
-  /* Sticky Glass Header */
+  /* Sticky Glass Header - Midnight Theme */
   .sticky-glass {
-    @apply sticky top-0 z-50 bg-white/80 backdrop-blur-glass border-b border-white/20 
-           shadow-glass transition-all duration-300;
+    @apply sticky top-0 z-50 backdrop-blur-glass border-b shadow-glass transition-all duration-200;
+    background-color: rgba(10, 14, 39, 0.95); /* midnight-900 with 95% opacity */
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  [data-theme='dark'] .sticky-glass {
+    background-color: rgba(5, 7, 17, 0.95); /* midnight-950 with 95% opacity */
+    border-bottom-color: rgba(255, 255, 255, 0.05);
   }
   
   /* Gradient Progress Bar with Glow - Optimized for GPU */
@@ -352,11 +415,98 @@
   
   /* WCAG AA Contrast Compliance */
   .text-contrast-safe {
-    color: #1f2937; /* gray-800 - ensures 4.5:1 contrast on white */
+    color: #1f2937 !important; /* gray-800 - ensures 4.5:1 contrast on white */
+  }
+  
+  [data-theme='dark'] .text-contrast-safe {
+    color: #f3f4f6 !important; /* gray-100 - ensures contrast on dark backgrounds */
   }
   
   .text-contrast-safe-light {
-    color: #ffffff; /* white - ensures 4.5:1 contrast on dark backgrounds */
+    color: #ffffff !important; /* white - ensures 4.5:1 contrast on dark backgrounds */
+  }
+  
+  /* Text visibility utilities */
+  .text-visible {
+    @apply text-gray-900;
+  }
+  
+  [data-theme='dark'] .text-visible {
+    @apply text-white;
+  }
+  
+  .text-visible-secondary {
+    @apply text-gray-700;
+  }
+  
+  [data-theme='dark'] .text-visible-secondary {
+    @apply text-gray-300;
+  }
+  
+  .text-visible-muted {
+    @apply text-gray-600;
+  }
+  
+  [data-theme='dark'] .text-visible-muted {
+    @apply text-gray-400;
+  }
+  
+  /* Dark theme text utilities - Better Visibility */
+  [data-theme='dark'] h1,
+  [data-theme='dark'] h2,
+  [data-theme='dark'] h3,
+  [data-theme='dark'] h4,
+  [data-theme='dark'] h5,
+  [data-theme='dark'] h6 {
+    @apply text-white;
+  }
+  
+  [data-theme='dark'] p {
+    @apply text-gray-300;
+  }
+  
+  /* Ensure card text is visible */
+  .card h1, .card h2, .card h3, .card h4, .card h5, .card h6 {
+    @apply text-gray-900;
+  }
+  
+  [data-theme='dark'] .card h1,
+  [data-theme='dark'] .card h2,
+  [data-theme='dark'] .card h3,
+  [data-theme='dark'] .card h4,
+  [data-theme='dark'] .card h5,
+  [data-theme='dark'] .card h6 {
+    @apply text-white;
+  }
+  
+  .card p {
+    @apply text-gray-700;
+  }
+  
+  [data-theme='dark'] .card p {
+    @apply text-gray-300;
+  }
+  
+  /* Card gradient text visibility */
+  .card-gradient h1, .card-gradient h2, .card-gradient h3, .card-gradient h4, .card-gradient h5, .card-gradient h6 {
+    @apply text-gray-900;
+  }
+  
+  [data-theme='dark'] .card-gradient h1,
+  [data-theme='dark'] .card-gradient h2,
+  [data-theme='dark'] .card-gradient h3,
+  [data-theme='dark'] .card-gradient h4,
+  [data-theme='dark'] .card-gradient h5,
+  [data-theme='dark'] .card-gradient h6 {
+    @apply text-white;
+  }
+  
+  .card-gradient p {
+    @apply text-gray-700;
+  }
+  
+  [data-theme='dark'] .card-gradient p {
+    @apply text-gray-300;
   }
   
   /* Ensure gradient text has sufficient contrast fallback */

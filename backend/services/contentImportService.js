@@ -9,8 +9,6 @@ import Lesson from '../models/Lesson.js';
  */
 export const importFromKhanAcademy = async (topicUrl) => {
   try {
-    console.log('Importing from Khan Academy:', topicUrl);
-    
     // For now, return structured data
     // In production, you'd use Khan Academy's API with proper authentication
     const khanAcademyLessons = [
@@ -105,8 +103,6 @@ If x = 5, what is 2x + 3?
  */
 export const importFromOpenStax = async () => {
   try {
-    console.log('Importing from OpenStax...');
-    
     const openStaxLessons = [
       {
         title: 'Introduction to Biology - Cell Structure',
@@ -236,8 +232,6 @@ Small size allows:
  */
 export const importFromMIT = async () => {
   try {
-    console.log('Importing from MIT OpenCourseWare...');
-    
     const mitLessons = [
       {
         title: 'Introduction to Computer Science - Algorithms',
@@ -415,8 +409,6 @@ END ALGORITHM
  */
 export const importFromWikipedia = async (topic) => {
   try {
-    console.log('Importing from Wikipedia:', topic);
-    
     // Wikipedia API endpoint
     const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`;
     
@@ -485,42 +477,31 @@ This is an introduction to ${data.title}. For more detailed information, visit t
  */
 export const importAllContent = async () => {
   try {
-    console.log('Starting content import from all sources...\n');
-    
     const allLessons = [];
     
     // Import from Khan Academy
-    console.log('1. Importing from Khan Academy...');
     const khanLessons = await importFromKhanAcademy();
     allLessons.push(...khanLessons);
-    console.log(`✓ Imported ${khanLessons.length} lessons from Khan Academy\n`);
     
     // Import from OpenStax
-    console.log('2. Importing from OpenStax...');
     const openStaxLessons = await importFromOpenStax();
     allLessons.push(...openStaxLessons);
-    console.log(`✓ Imported ${openStaxLessons.length} lessons from OpenStax\n`);
     
     // Import from MIT
-    console.log('3. Importing from MIT OpenCourseWare...');
     const mitLessons = await importFromMIT();
     allLessons.push(...mitLessons);
-    console.log(`✓ Imported ${mitLessons.length} lessons from MIT\n`);
     
     // Import from Wikipedia (sample topics)
-    console.log('4. Importing from Wikipedia...');
     const wikiTopics = ['Photosynthesis', 'Solar_System', 'World_War_II'];
     for (const topic of wikiTopics) {
       try {
         const wikiLessons = await importFromWikipedia(topic);
         allLessons.push(...wikiLessons);
-        console.log(`✓ Imported: ${topic}`);
       } catch (error) {
-        console.log(`✗ Failed to import: ${topic}`);
+        // Skip failed imports
       }
     }
     
-    console.log(`\n✓ Total lessons imported: ${allLessons.length}`);
     return allLessons;
   } catch (error) {
     console.error('Error in importAllContent:', error);

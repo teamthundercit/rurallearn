@@ -48,7 +48,6 @@ class TFRecommendationService {
       });
 
       this.isInitialized = true;
-      console.log('✓ TensorFlow.js recommendation model initialized');
     } catch (error) {
       console.error('Failed to initialize TensorFlow model:', error);
       throw error;

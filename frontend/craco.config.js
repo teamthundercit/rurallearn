@@ -3,13 +3,11 @@
  * Overrides Create React App webpack config without ejecting
  */
 
-const webpack = require('webpack');
 const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
   webpack: {
-    configure: (webpackConfig, { env, paths }) => {
-      // Production optimizations
+    configure: (webpackConfig, { env }) => {
       if (env === 'production') {
         // Enable gzip compression
         webpackConfig.plugins.push(

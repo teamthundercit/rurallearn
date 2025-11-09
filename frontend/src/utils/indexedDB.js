@@ -54,10 +54,7 @@ export const cacheLesson = async (lesson) => {
     return new Promise((resolve, reject) => {
       const request = store.put(lessonWithTimestamp);
       
-      request.onsuccess = () => {
-        console.log('Lesson cached:', lesson._id);
-        resolve(request.result);
-      };
+      request.onsuccess = () => resolve(request.result);
       
       request.onerror = () => {
         console.error('Error caching lesson:', request.error);
@@ -130,10 +127,7 @@ export const deleteCachedLesson = async (lessonId) => {
     return new Promise((resolve, reject) => {
       const request = store.delete(lessonId);
       
-      request.onsuccess = () => {
-        console.log('Lesson deleted from cache:', lessonId);
-        resolve();
-      };
+      request.onsuccess = () => resolve();
       
       request.onerror = () => {
         console.error('Error deleting cached lesson:', request.error);
@@ -156,10 +150,7 @@ export const clearAllCachedLessons = async () => {
     return new Promise((resolve, reject) => {
       const request = store.clear();
       
-      request.onsuccess = () => {
-        console.log('All cached lessons cleared');
-        resolve();
-      };
+      request.onsuccess = () => resolve();
       
       request.onerror = () => {
         console.error('Error clearing cached lessons:', request.error);
@@ -188,10 +179,7 @@ export const queueProgressUpdate = async (progressData) => {
     return new Promise((resolve, reject) => {
       const request = store.add(queuedData);
       
-      request.onsuccess = () => {
-        console.log('Progress update queued:', progressData);
-        resolve(request.result);
-      };
+      request.onsuccess = () => resolve(request.result);
       
       request.onerror = () => {
         console.error('Error queuing progress update:', request.error);
@@ -251,10 +239,7 @@ export const markProgressAsSynced = async (id) => {
           
           const putRequest = store.put(data);
           
-          putRequest.onsuccess = () => {
-            console.log('Progress marked as synced:', id);
-            resolve();
-          };
+          putRequest.onsuccess = () => resolve();
           
           putRequest.onerror = () => {
             console.error('Error marking progress as synced:', putRequest.error);
@@ -293,7 +278,6 @@ export const deleteSyncedProgress = async () => {
           cursor.delete();
           cursor.continue();
         } else {
-          console.log('Synced progress updates deleted');
           resolve();
         }
       };

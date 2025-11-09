@@ -18,10 +18,6 @@ export function register(config) {
       if (isLocalhost) {
         // Check if service worker exists in localhost
         checkValidServiceWorker(swUrl, config);
-        
-        navigator.serviceWorker.ready.then(() => {
-          console.log('Service worker is ready for offline use.');
-        });
       } else {
         // Register service worker
         registerValidSW(swUrl, config);
@@ -34,8 +30,6 @@ function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
-      console.log('Service Worker registered:', registration);
-
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
@@ -46,15 +40,11 @@ function registerValidSW(swUrl, config) {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
               // New content available
-              console.log('New content is available; please refresh.');
-
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
             } else {
               // Content cached for offline use
-              console.log('Content is cached for offline use.');
-
               if (config && config.onSuccess) {
                 config.onSuccess(registration);
               }
@@ -91,7 +81,7 @@ function checkValidServiceWorker(swUrl, config) {
       }
     })
     .catch(() => {
-      console.log('No internet connection. App is running in offline mode.');
+      // No internet connection, app running in offline mode
     });
 }
 

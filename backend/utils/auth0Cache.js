@@ -19,13 +19,11 @@ export const getCachedAuth0User = async (key, fetchFunction) => {
   
   // Return fresh cache
   if (cached && now - cached.timestamp < CACHE_TTL) {
-    console.log(`Cache HIT for ${key}`);
     return cached.data;
   }
   
   // Try to fetch fresh data
   try {
-    console.log(`Cache MISS for ${key}, fetching from Auth0...`);
     const data = await fetchFunction();
     
     cache.set(key, {
@@ -58,7 +56,6 @@ export const getCachedAuth0User = async (key, fetchFunction) => {
  */
 export const invalidateCache = (key) => {
   cache.delete(key);
-  console.log(`Cache invalidated for ${key}`);
 };
 
 /**
@@ -66,7 +63,6 @@ export const invalidateCache = (key) => {
  */
 export const clearAllCache = () => {
   cache.clear();
-  console.log('All cache cleared');
 };
 
 /**
@@ -106,10 +102,6 @@ const cleanupInterval = setInterval(() => {
       cache.delete(key);
       cleaned++;
     }
-  }
-  
-  if (cleaned > 0) {
-    console.log(`Cache cleanup: removed ${cleaned} stale entries`);
   }
 }, 10 * 60 * 1000);
 

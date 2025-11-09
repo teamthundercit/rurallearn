@@ -26,7 +26,7 @@ export const preloadRoute = (lazyComponent, routeName) => {
     
     preloadedRoutes.add(routeName);
   } catch (error) {
-    console.warn(`Failed to preload route: ${routeName}`, error);
+    // Silently fail - preloading is an optimization, not critical
   }
 };
 

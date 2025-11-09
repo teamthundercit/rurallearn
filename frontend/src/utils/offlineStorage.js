@@ -35,7 +35,6 @@ export const initDB = () => {
 
     request.onsuccess = () => {
       db = request.result;
-      console.log('IndexedDB initialized successfully');
       resolve(db);
     };
 
@@ -68,8 +67,6 @@ export const initDB = () => {
         syncStore.createIndex('type', 'type', { unique: false });
         syncStore.createIndex('timestamp', 'timestamp', { unique: false });
       }
-
-      console.log('IndexedDB schema created');
     };
   });
 };
@@ -88,10 +85,7 @@ export const saveLessonsOffline = async (lessons) => {
     }
 
     return new Promise((resolve, reject) => {
-      transaction.oncomplete = () => {
-        console.log(`Saved ${lessons.length} lessons offline`);
-        resolve();
-      };
+      transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
     });
   } catch (error) {
@@ -179,10 +173,7 @@ export const saveProgressOffline = async (progressData) => {
     });
 
     return new Promise((resolve, reject) => {
-      transaction.oncomplete = () => {
-        console.log('Progress saved offline for later sync');
-        resolve();
-      };
+      transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
     });
   } catch (error) {
@@ -225,10 +216,7 @@ export const clearSyncedItems = async (itemIds) => {
     }
 
     return new Promise((resolve, reject) => {
-      transaction.oncomplete = () => {
-        console.log(`Cleared ${itemIds.length} synced items`);
-        resolve();
-      };
+      transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
     });
   } catch (error) {
@@ -293,10 +281,7 @@ export const clearOfflineData = async () => {
     transaction.objectStore(STORES.PENDING_SYNC).clear();
 
     return new Promise((resolve, reject) => {
-      transaction.oncomplete = () => {
-        console.log('All offline data cleared');
-        resolve();
-      };
+      transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
     });
   } catch (error) {

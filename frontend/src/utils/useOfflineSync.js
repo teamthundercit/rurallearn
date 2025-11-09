@@ -10,12 +10,10 @@ export const useOfflineSync = (token) => {
   // Update online status
   useEffect(() => {
     const handleOnline = () => {
-      console.log('Connection restored');
       setIsOnline(true);
     };
 
     const handleOffline = () => {
-      console.log('Connection lost');
       setIsOnline(false);
     };
 
@@ -47,29 +45,23 @@ export const useOfflineSync = (token) => {
     }
 
     setIsSyncing(true);
-    console.log('Starting data sync...');
 
     try {
       const unsyncedData = await getUnsyncedProgress();
       
       if (unsyncedData.length === 0) {
-        console.log('No data to sync');
         setIsSyncing(false);
         return;
       }
-
-      console.log(`Syncing ${unsyncedData.length} items...`);
 
       for (const item of unsyncedData) {
         try {
           if (item.type === 'lessonCompletion') {
             await recordLessonCompletion(token, item.lessonId, item.timeSpent);
             await markProgressAsSynced(item.id);
-            console.log('Synced lesson completion:', item.lessonId);
           } else if (item.type === 'quizSubmission') {
             await submitQuiz(token, item.lessonId, item.answers);
             await markProgressAsSynced(item.id);
-            console.log('Synced quiz submission:', item.lessonId);
           }
         } catch (error) {
           console.error('Error syncing item:', item, error);
@@ -82,8 +74,6 @@ export const useOfflineSync = (token) => {
       
       // Update unsynced count
       await checkUnsyncedData();
-      
-      console.log('Data sync completed');
     } catch (error) {
       console.error('Error during sync:', error);
     } finally {

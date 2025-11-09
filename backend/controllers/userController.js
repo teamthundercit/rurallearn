@@ -26,6 +26,17 @@ export const handleAuthCallback = async (req, res) => {
           role: user.role,
           avatar: user.avatar,
           preferences: user.preferences,
+          gamification: {
+            streak: {
+              current: user.gamification?.streak?.current || 0,
+              longest: user.gamification?.streak?.longest || 0,
+              lastActivityDate: user.gamification?.streak?.lastActivityDate || null
+            },
+            badges: user.gamification?.badges || [],
+            totalPoints: user.gamification?.totalPoints || 0,
+            weeklyGoal: user.gamification?.weeklyGoal || 3,
+            monthlyGoal: user.gamification?.monthlyGoal || 12
+          },
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         }
@@ -61,6 +72,17 @@ export const getCurrentUser = async (req, res) => {
           role: user.role,
           avatar: user.avatar,
           preferences: user.preferences,
+          gamification: {
+            streak: {
+              current: user.gamification?.streak?.current || 0,
+              longest: user.gamification?.streak?.longest || 0,
+              lastActivityDate: user.gamification?.streak?.lastActivityDate || null
+            },
+            badges: user.gamification?.badges || [],
+            totalPoints: user.gamification?.totalPoints || 0,
+            weeklyGoal: user.gamification?.weeklyGoal || 3,
+            monthlyGoal: user.gamification?.monthlyGoal || 12
+          },
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         }

@@ -22,13 +22,14 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
                '•';
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-slide-in">
-      <div className={`${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 max-w-md`}>
-        <span className="text-xl font-bold">{icon}</span>
-        <p className="flex-1">{message}</p>
+    <div className="fixed top-20 right-4 z-[9999] animate-slide-in">
+      <div className={`${bgColor} text-white px-6 py-4 rounded-lg shadow-2xl flex items-center space-x-3 max-w-md backdrop-blur-sm`}>
+        <span className="text-xl font-bold flex-shrink-0">{icon}</span>
+        <p className="flex-1 text-sm sm:text-base">{message}</p>
         <button
           onClick={onClose}
-          className="text-white hover:text-gray-200 font-bold text-xl"
+          className="text-white hover:text-gray-200 font-bold text-xl flex-shrink-0 ml-2"
+          aria-label="Close notification"
         >
           ×
         </button>

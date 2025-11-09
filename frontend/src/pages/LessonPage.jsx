@@ -78,14 +78,20 @@ const LessonPage = () => {
   const handleNextSection = () => {
     if (currentSection < contentSections.length - 1) {
       setCurrentSection(currentSection + 1);
-      lessonContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Smooth scroll to top of content
+      setTimeout(() => {
+        lessonContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
     }
   };
 
   const handlePreviousSection = () => {
     if (currentSection > 0) {
       setCurrentSection(currentSection - 1);
-      lessonContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Smooth scroll to top of content
+      setTimeout(() => {
+        lessonContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
     }
   };
 
@@ -106,14 +112,17 @@ const LessonPage = () => {
       // Show quiz if available
       if (lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0) {
         setShowQuiz(true);
-        // Scroll to quiz
+        // Scroll to quiz smoothly
         setTimeout(() => {
-          lessonContentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }, 100);
+          window.scrollTo({ 
+            top: document.documentElement.scrollHeight, 
+            behavior: 'smooth' 
+          });
+        }, 300);
       } else {
-        // No quiz, navigate back after a short delay
+        // No quiz, navigate back after a short delay with refresh flag
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/dashboard', { state: { refresh: true } });
         }, 2000);
       }
     } catch (err) {
@@ -142,6 +151,11 @@ const LessonPage = () => {
         : `Quiz submitted. Your score: ${results.score}%. Keep practicing! 📚`;
       
       showToast(message, results.score >= 70 ? 'success' : 'info');
+      
+      // Scroll to top to show the return button
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 500);
     } catch (err) {
       console.error('Error submitting quiz:', err);
       showToast('Failed to submit quiz. Please try again.', 'error');
@@ -157,10 +171,10 @@ const LessonPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-midnight-900">
         <div className="text-center animate-scale-in">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200 border-t-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium text-lg">Loading lesson...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500/20 border-t-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-300 font-medium text-lg">Loading lesson...</p>
         </div>
       </div>
     );
@@ -168,12 +182,12 @@ const LessonPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-        <div className="card-gradient max-w-md animate-scale-in">
+      <div className="min-h-screen flex items-center justify-center bg-midnight-900">
+        <div className="glass-neon-blue max-w-md animate-scale-in border border-white/10 rounded-xl p-8">
           <div className="text-center">
             <span className="text-6xl mb-4 block">⚠️</span>
-            <h2 className="text-2xl font-display font-bold text-red-600 mb-4">Error</h2>
-            <p className="text-gray-700 mb-6">{error}</p>
+            <h2 className="text-2xl font-display font-bold text-red-400 mb-4">Error</h2>
+            <p className="text-gray-300 mb-6">{error}</p>
             <div className="flex gap-4 justify-center">
               <button
                 onClick={() => window.location.reload()}
@@ -196,11 +210,11 @@ const LessonPage = () => {
 
   if (!lesson) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-        <div className="card-gradient animate-scale-in">
+      <div className="min-h-screen flex items-center justify-center bg-midnight-900">
+        <div className="glass-neon-blue animate-scale-in border border-white/10 rounded-xl p-8">
           <div className="text-center">
             <span className="text-6xl mb-4 block">📚</span>
-            <h2 className="text-2xl font-display font-bold text-gray-900 mb-4">Lesson Not Found</h2>
+            <h2 className="text-2xl font-display font-bold text-white mb-4">Lesson Not Found</h2>
             <button
               onClick={() => navigate('/dashboard')}
               className="btn-primary"
@@ -214,7 +228,7 @@ const LessonPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-midnight-900">
       {/* Toast Notification */}
       {toast && (
         <Toast
@@ -225,12 +239,12 @@ const LessonPage = () => {
       )}
       
       {/* Modern Header */}
-      <header className="glass sticky top-0 z-50 border-b border-white/20">
+      <header className="sticky-glass border-b border-white/10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-all group"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-all group"
             >
               <svg className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -238,10 +252,10 @@ const LessonPage = () => {
               <span className="font-semibold">Back</span>
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-xl">🎓</span>
               </div>
-              <h1 className="text-xl font-display font-black text-gradient">EduAdapt</h1>
+              <h1 className="text-xl font-display font-black text-neon-animate">EduAdapt</h1>
             </div>
           </div>
         </div>
@@ -253,10 +267,10 @@ const LessonPage = () => {
         <div className="mb-8 animate-slide-down">
           <div className="flex items-center flex-wrap gap-2 mb-4">
             {lesson.difficulty && (
-              <span className={`badge ${
-                lesson.difficulty === 'beginner' ? 'bg-success-100 text-success-800 border-success-200' :
-                lesson.difficulty === 'intermediate' ? 'bg-accent-100 text-accent-800 border-accent-200' :
-                'bg-red-100 text-red-800 border-red-200'
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                lesson.difficulty === 'beginner' ? 'bg-green-500/20 text-green-300' :
+                lesson.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
+                'bg-red-500/20 text-red-300'
               }`}>
                 {lesson.difficulty === 'beginner' ? '🌱' : lesson.difficulty === 'intermediate' ? '🌿' : '🌳'}
                 {' '}{lesson.difficulty.charAt(0).toUpperCase() + lesson.difficulty.slice(1)}
@@ -265,33 +279,33 @@ const LessonPage = () => {
             {lesson.tags && lesson.tags.map((tag, index) => (
               <span
                 key={index}
-                className="badge badge-primary"
+                className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300"
               >
                 #{tag}
               </span>
             ))}
           </div>
           
-          <h1 className="text-4xl sm:text-5xl font-display font-black text-gradient-animate mb-4">
+          <h1 className="text-4xl sm:text-5xl font-display font-black text-white mb-4">
             {lesson.title}
           </h1>
           
           {lesson.description && (
-            <p className="text-lg text-gray-600 leading-relaxed">
+            <p className="text-lg text-gray-300 leading-relaxed">
               {lesson.description}
             </p>
           )}
 
           {/* Content Attribution */}
           {lesson.source && lesson.source.name !== 'Original' && (
-            <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+            <div className="mt-4 p-4 bg-blue-500/10 border-l-4 border-blue-500 rounded-r-lg">
               <div className="flex items-start gap-3">
                 <span className="text-2xl">📚</span>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-blue-900 mb-1">
+                  <p className="text-sm font-semibold text-blue-300 mb-1">
                     Content Source
                   </p>
-                  <p className="text-sm text-blue-800">
+                  <p className="text-sm text-gray-300">
                     {lesson.source.attribution}
                   </p>
                   {lesson.source.url && (
@@ -299,13 +313,13 @@ const LessonPage = () => {
                       href={lesson.source.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:text-blue-800 underline mt-1 inline-block"
+                      className="text-sm text-blue-400 hover:text-blue-300 underline mt-1 inline-block"
                     >
                       View original source →
                     </a>
                   )}
                   {lesson.source.license && (
-                    <p className="text-xs text-blue-700 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       License: {lesson.source.license}
                     </p>
                   )}
@@ -316,7 +330,7 @@ const LessonPage = () => {
         </div>
 
         {/* Lesson Content */}
-        <div className="card-gradient p-8 mb-8 animate-scale-in">
+        <div className="glass-neon-blue p-8 mb-8 animate-scale-in border border-white/10 rounded-xl">
           {/* Video Content */}
           {lesson.content?.type === 'video' && lesson.content?.videoUrl && (
             <div className="mb-8">
@@ -343,25 +357,25 @@ const LessonPage = () => {
               {contentSections.length > 1 ? (
                 <>
                   {/* Progress indicator */}
-                  <div className="mb-6 p-4 bg-primary-50 rounded-lg border border-primary-200">
+                  <div className="mb-6 p-4 bg-blue-500/10 rounded-lg border border-blue-500/30">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-primary-900">
+                      <span className="text-sm font-semibold text-white">
                         Section {currentSection + 1} of {contentSections.length}
                       </span>
-                      <span className="text-sm text-primary-700">
+                      <span className="text-sm text-blue-300">
                         {Math.round(((currentSection + 1) / contentSections.length) * 100)}% Complete
                       </span>
                     </div>
-                    <div className="w-full bg-primary-200 rounded-full h-2">
+                    <div className="w-full bg-white/10 rounded-full h-2">
                       <div 
-                        className="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${((currentSection + 1) / contentSections.length) * 100}%` }}
                       ></div>
                     </div>
                   </div>
 
                   {/* Current section content */}
-                  <div className="text-gray-800 leading-relaxed mb-6">
+                  <div className="text-gray-200 leading-relaxed mb-6">
                     {contentSections[currentSection].content.split('\n').map((paragraph, index) => (
                       <p key={index} className="mb-4">
                         {paragraph}
@@ -370,11 +384,11 @@ const LessonPage = () => {
                   </div>
 
                   {/* Navigation buttons */}
-                  <div className="flex gap-3 justify-between items-center pt-4 border-t border-gray-200">
+                  <div className="flex gap-3 justify-between items-center pt-4 border-t border-white/10">
                     <button
                       onClick={handlePreviousSection}
                       disabled={currentSection === 0}
-                      className={`btn-secondary flex items-center gap-2 ${
+                      className={`bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                         currentSection === 0 ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
@@ -387,7 +401,7 @@ const LessonPage = () => {
                     {currentSection < contentSections.length - 1 ? (
                       <button
                         onClick={handleNextSection}
-                        className="btn-primary flex items-center gap-2"
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all flex items-center gap-2"
                       >
                         Next Section
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -395,7 +409,7 @@ const LessonPage = () => {
                         </svg>
                       </button>
                     ) : (
-                      <div className="text-sm text-success-600 font-medium flex items-center gap-2">
+                      <div className="text-sm text-green-400 font-medium flex items-center gap-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -406,7 +420,7 @@ const LessonPage = () => {
                 </>
               ) : (
                 // Single section - show all content
-                <div className="text-gray-800 leading-relaxed">
+                <div className="text-gray-200 leading-relaxed">
                   {lesson.content.text.split('\n').map((paragraph, index) => (
                     <p key={index} className="mb-4">
                       {paragraph}
@@ -419,10 +433,10 @@ const LessonPage = () => {
 
           {/* Complete Lesson Button */}
           {!showQuiz && !quizSubmitted && (
-            <div className="mt-8 pt-8 border-t border-gray-200">
+            <div className="mt-8 pt-8 border-t border-white/10">
               <button
                 onClick={handleCompleteLesson}
-                className="btn-primary w-full text-lg group"
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all w-full text-lg group"
               >
                 <span className="flex items-center justify-center gap-2">
                   {lesson.quiz && lesson.quiz.questions && lesson.quiz.questions.length > 0
@@ -447,18 +461,27 @@ const LessonPage = () => {
             />
             
             {quizSubmitted && (
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="btn-primary text-lg"
-                >
-                  <span className="flex items-center gap-2">
-                    Return to Dashboard
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                  </span>
-                </button>
+              <div className="mt-6 animate-scale-in">
+                <div className="glass-neon-blue p-6 rounded-xl border border-white/10 mb-4">
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">🎉</div>
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      Quiz Submitted Successfully!
+                    </h3>
+                    <p className="text-gray-300 mb-6">
+                      Your progress has been saved. Great work!
+                    </p>
+                    <button
+                      onClick={() => navigate('/dashboard', { state: { refresh: true } })}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all text-lg inline-flex items-center gap-2 shadow-lg"
+                    >
+                      Return to Dashboard
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

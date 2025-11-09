@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Leaderboard = ({ userRank, userPoints, topLearners }) => {
+  const { t } = useTranslation();
   const [timeframe, setTimeframe] = useState('week');
 
   const mockLeaderboard = [
@@ -39,9 +41,9 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
           </div>
           <div>
             <h3 className="text-xl font-display font-bold text-white">
-              Leaderboard
+              {t('dashboard.leaderboard')}
             </h3>
-            <p className="text-sm text-gray-400">See how you rank among learners</p>
+            <p className="text-sm text-gray-400">{t('dashboard.seeHowYouRank')}</p>
           </div>
         </div>
         <select
@@ -49,9 +51,9 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
           onChange={(e) => setTimeframe(e.target.value)}
           className="text-sm border border-white/20 bg-white/5 text-white rounded-lg px-3 py-1 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
         >
-          <option value="week" className="bg-midnight-800">This Week</option>
-          <option value="month" className="bg-midnight-800">This Month</option>
-          <option value="all" className="bg-midnight-800">All Time</option>
+          <option value="week" className="bg-midnight-800">{t('dashboard.thisWeek')}</option>
+          <option value="month" className="bg-midnight-800">{t('dashboard.thisMonth')}</option>
+          <option value="all" className="bg-midnight-800">{t('dashboard.allTime')}</option>
         </select>
       </div>
 
@@ -63,11 +65,11 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-white">Your Rank: #{currentUserRank}</span>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300">{currentUserPoints} pts</span>
+              <span className="font-bold text-white">{t('dashboard.yourRank')}: #{currentUserRank}</span>
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300">{currentUserPoints} {t('gamification.leaderboard.points')}</span>
             </div>
             <p className="text-sm text-gray-400">
-              {currentUserRank <= 10 ? 'Great job! You\'re in the top 10!' : 'Keep learning to climb higher!'}
+              {currentUserRank <= 10 ? t('dashboard.greatJobTop10') : t('dashboard.keepLearning')}
             </p>
           </div>
         </div>
@@ -75,7 +77,7 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
 
       {/* Top Learners */}
       <div className="space-y-2">
-        <h4 className="font-bold text-white mb-3">Top Learners</h4>
+        <h4 className="font-bold text-white mb-3">{t('dashboard.topLearners')}</h4>
         {leaderboardData.slice(0, 5).map((learner, index) => (
           <div
             key={index}
@@ -97,7 +99,7 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-400">{learner.points} points</p>
+              <p className="text-sm text-gray-400">{learner.points} {t('gamification.leaderboard.points')}</p>
             </div>
             <span className="text-2xl">{learner.badge}</span>
           </div>
@@ -106,7 +108,7 @@ const Leaderboard = ({ userRank, userPoints, topLearners }) => {
 
       {/* Disclaimer */}
       <div className="mt-4 text-xs text-gray-500 text-center">
-        <p>🔒 All names are anonymous to protect privacy</p>
+        <p>🔒 {t('dashboard.anonymousPrivacy')}</p>
       </div>
     </div>
   );

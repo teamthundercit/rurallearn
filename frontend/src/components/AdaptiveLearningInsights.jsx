@@ -1,6 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const AdaptiveLearningInsights = ({ insights }) => {
+  const { t } = useTranslation();
+  
   if (!insights) return null;
 
   const { currentLevel, averageScore, learningPace, recommendedDifficulty, canAdvance, advancementMessage } = insights;
@@ -38,9 +41,9 @@ const AdaptiveLearningInsights = ({ insights }) => {
         </div>
         <div>
           <h3 className="text-2xl font-display font-bold text-gray-900">
-            Your Learning Path
+            {t('ai.adaptiveLearning.title')}
           </h3>
-          <p className="text-sm text-gray-600">Personalized insights based on your performance</p>
+          <p className="text-sm text-gray-600">{t('ai.adaptiveLearning.subtitle')}</p>
         </div>
       </div>
 
@@ -50,16 +53,16 @@ const AdaptiveLearningInsights = ({ insights }) => {
         <div className="glass p-4 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-2xl">{getLevelIcon(currentLevel)}</span>
-            <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Level</span>
+            <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('ai.adaptiveLearning.level')}</span>
           </div>
-          <p className="text-xl font-bold text-gray-900 capitalize">{currentLevel}</p>
+          <p className="text-xl font-bold text-gray-900 capitalize">{t(`ai.adaptiveLearning.levels.${currentLevel}`)}</p>
         </div>
 
         {/* Average Score */}
         <div className="glass p-4 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-2xl">📊</span>
-            <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Avg Score</span>
+            <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('ai.adaptiveLearning.avgScore')}</span>
           </div>
           <p className={`text-xl font-bold ${getScoreColor(averageScore)}`}>
             {averageScore}%
@@ -70,9 +73,9 @@ const AdaptiveLearningInsights = ({ insights }) => {
         <div className="glass p-4 rounded-xl">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-2xl">{getPaceIcon(learningPace)}</span>
-            <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Pace</span>
+            <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('ai.adaptiveLearning.pace')}</span>
           </div>
-          <p className="text-xl font-bold text-gray-900 capitalize">{learningPace}</p>
+          <p className="text-xl font-bold text-gray-900 capitalize">{t(`ai.adaptiveLearning.paces.${learningPace}`)}</p>
         </div>
       </div>
 
@@ -82,7 +85,7 @@ const AdaptiveLearningInsights = ({ insights }) => {
           <div className="flex items-start gap-3">
             <span className="text-2xl">🎉</span>
             <div className="flex-1">
-              <p className="font-bold text-success-800 mb-1">Ready to Level Up!</p>
+              <p className="font-bold text-success-800 mb-1">{t('ai.adaptiveLearning.readyToLevelUp')}</p>
               <p className="text-sm text-success-700">{advancementMessage}</p>
             </div>
           </div>
@@ -92,7 +95,7 @@ const AdaptiveLearningInsights = ({ insights }) => {
           <div className="flex items-start gap-3">
             <span className="text-2xl">💪</span>
             <div className="flex-1">
-              <p className="font-bold text-gray-800 mb-1">Keep Building Skills</p>
+              <p className="font-bold text-gray-800 mb-1">{t('ai.adaptiveLearning.keepBuilding')}</p>
               <p className="text-sm text-gray-700">{advancementMessage}</p>
             </div>
           </div>
@@ -101,9 +104,9 @@ const AdaptiveLearningInsights = ({ insights }) => {
 
       {/* Recommended Difficulty */}
       <div className="mt-4 flex items-center justify-between text-sm">
-        <span className="text-gray-600">Recommended difficulty:</span>
+        <span className="text-gray-600">{t('ai.adaptiveLearning.recommendedDifficulty')}</span>
         <span className="badge badge-primary capitalize">
-          {getLevelIcon(recommendedDifficulty)} {recommendedDifficulty}
+          {getLevelIcon(recommendedDifficulty)} {t(`ai.adaptiveLearning.levels.${recommendedDifficulty}`)}
         </span>
       </div>
     </div>

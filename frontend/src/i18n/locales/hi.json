@@ -47,7 +47,31 @@
     "readyToLearn": "सीखने के लिए तैयार?",
     "browseLessons": "पाठ ब्राउज़ करें",
     "continueJourney": "नए पाठों के साथ अपनी सीखने की यात्रा जारी रखें",
-    "startJourney": "उपलब्ध पाठों का अन्वेषण करके अपनी सीखने की यात्रा शुरू करें"
+    "startJourney": "उपलब्ध पाठों का अन्वेषण करके अपनी सीखने की यात्रा शुरू करें",
+    "studyStreak": "अध्ययन लकीर",
+    "pointsEarned": "अर्जित अंक",
+    "achievements": "उपलब्धियां",
+    "days": "दिन",
+    "backToDashboard": "डैशबोर्ड पर वापस",
+    "yourLatestAccomplishments": "आपकी नवीनतम उपलब्धियां",
+    "completeToSeeAchievements": "उपलब्धियां देखने के लिए पाठ पूरे करें!",
+    "recentActivities": "हाल की गतिविधियां",
+    "viewAllAchievements": "सभी उपलब्धियां देखें",
+    "seeHowYouRank": "देखें कि आप शिक्षार्थियों में कहां रैंक करते हैं",
+    "thisWeek": "इस सप्ताह",
+    "thisMonth": "इस महीने",
+    "allTime": "सभी समय",
+    "yourRank": "आपकी रैंक",
+    "greatJobTop10": "बढ़िया काम! आप शीर्ष 10 में हैं!",
+    "keepLearning": "ऊपर चढ़ने के लिए सीखते रहें!",
+    "topLearners": "शीर्ष शिक्षार्थी",
+    "anonymousPrivacy": "गोपनीयता की रक्षा के लिए सभी नाम गुमनाम हैं",
+    "yourLearningPattern": "इस सप्ताह आपका सीखने का पैटर्न",
+    "startLearningToSeeChart": "अपना गतिविधि चार्ट देखने के लिए सीखना शुरू करें!",
+    "lessonsThisWeek": "इस सप्ताह पाठ",
+    "totalTime": "कुल समय",
+    "loadingDashboard": "आपका डैशबोर्ड लोड हो रहा है...",
+    "loadingLessons": "पाठ लोड हो रहे हैं..."
   },
   "lessons": {
     "browse": "पाठ ब्राउज़ करें",
@@ -161,6 +185,40 @@
       "thisMonth": "इस महीने",
       "allTime": "सभी समय",
       "anonymous": "गोपनीयता की रक्षा के लिए सभी नाम गुमनाम हैं"
+    }
+  },
+  "ai": {
+    "recommendations": {
+      "title": "AI अनुशंसाएं",
+      "poweredBy": "TensorFlow और Gemini AI द्वारा संचालित",
+      "loading": "व्यक्तिगत अनुशंसाएं उत्पन्न हो रही हैं...",
+      "noRecommendations": "इस समय कोई अनुशंसा उपलब्ध नहीं है।",
+      "startLearning": "अभी सीखना शुरू करें",
+      "priority": {
+        "high": "उच्च",
+        "medium": "मध्यम",
+        "low": "निम्न"
+      }
+    },
+    "adaptiveLearning": {
+      "title": "आपका सीखने का मार्ग",
+      "subtitle": "आपके प्रदर्शन के आधार पर व्यक्तिगत अंतर्दृष्टि",
+      "level": "स्तर",
+      "avgScore": "औसत स्कोर",
+      "pace": "गति",
+      "readyToLevelUp": "स्तर बढ़ाने के लिए तैयार!",
+      "keepBuilding": "कौशल बनाते रहें",
+      "recommendedDifficulty": "अनुशंसित कठिनाई:",
+      "paces": {
+        "fast": "तेज",
+        "moderate": "मध्यम",
+        "slow": "धीमा"
+      },
+      "levels": {
+        "beginner": "शुरुआती",
+        "intermediate": "मध्यवर्ती",
+        "advanced": "उन्नत"
+      }
     }
   },
   "errors": {

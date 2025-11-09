@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const RecentAchievements = ({ achievements }) => {
+  const { t } = useTranslation();
   if (!achievements || achievements.length === 0) {
     return (
       <div className="glass-neon-blue p-6 animate-scale-in border border-white/10 rounded-xl">
@@ -10,14 +12,14 @@ const RecentAchievements = ({ achievements }) => {
           </div>
           <div>
             <h3 className="text-xl font-display font-bold text-white">
-              Recent Achievements
+              {t('dashboard.recentAchievements')}
             </h3>
-            <p className="text-sm text-gray-400">Your latest accomplishments</p>
+            <p className="text-sm text-gray-400">{t('dashboard.yourLatestAccomplishments')}</p>
           </div>
         </div>
         <div className="text-center py-8">
           <span className="text-6xl mb-4 block opacity-50">🏆</span>
-          <p className="text-gray-400">Complete lessons to see your achievements!</p>
+          <p className="text-gray-400">{t('dashboard.completeToSeeAchievements')}</p>
         </div>
       </div>
     );
@@ -52,9 +54,9 @@ const RecentAchievements = ({ achievements }) => {
         </div>
         <div>
           <h3 className="text-xl font-display font-bold text-white">
-            Recent Achievements
+            {t('dashboard.recentAchievements')}
           </h3>
-          <p className="text-sm text-gray-400">{achievements.length} recent activities</p>
+          <p className="text-sm text-gray-400">{achievements.length} {t('dashboard.recentActivities')}</p>
         </div>
       </div>
 
@@ -99,7 +101,7 @@ const RecentAchievements = ({ achievements }) => {
       {achievements.length > 8 && (
         <div className="text-center mt-4">
           <button className="text-blue-400 hover:text-blue-300 text-sm font-medium">
-            View all achievements →
+            {t('dashboard.viewAllAchievements')} →
           </button>
         </div>
       )}

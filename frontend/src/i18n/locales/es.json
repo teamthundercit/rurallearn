@@ -163,6 +163,40 @@
       "anonymous": "Todos los nombres son anónimos para proteger la privacidad"
     }
   },
+  "ai": {
+    "recommendations": {
+      "title": "Recomendaciones de IA",
+      "poweredBy": "Impulsado por TensorFlow y Gemini AI",
+      "loading": "Generando recomendaciones personalizadas...",
+      "noRecommendations": "No hay recomendaciones disponibles en este momento.",
+      "startLearning": "Comenzar a Aprender Ahora",
+      "priority": {
+        "high": "Alta",
+        "medium": "Media",
+        "low": "Baja"
+      }
+    },
+    "adaptiveLearning": {
+      "title": "Tu Ruta de Aprendizaje",
+      "subtitle": "Información personalizada basada en tu rendimiento",
+      "level": "Nivel",
+      "avgScore": "Puntuación Promedio",
+      "pace": "Ritmo",
+      "readyToLevelUp": "¡Listo para Subir de Nivel!",
+      "keepBuilding": "Sigue Desarrollando Habilidades",
+      "recommendedDifficulty": "Dificultad recomendada:",
+      "paces": {
+        "fast": "Rápido",
+        "moderate": "Moderado",
+        "slow": "Lento"
+      },
+      "levels": {
+        "beginner": "Principiante",
+        "intermediate": "Intermedio",
+        "advanced": "Avanzado"
+      }
+    }
+  },
   "errors": {
     "generic": "Algo salió mal. Por favor, inténtalo de nuevo.",
     "network": "Error de red. Por favor, verifica tu conexión.",

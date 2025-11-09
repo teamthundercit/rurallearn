@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { getRecommendations, getLessons } from '../services/api';
 import AdaptiveLearningInsights from './AdaptiveLearningInsights';
@@ -8,6 +9,7 @@ import AdaptiveLearningInsights from './AdaptiveLearningInsights';
 const RecommendationPanel = () => {
   const { getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [recommendations, setRecommendations] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,12 +78,12 @@ const RecommendationPanel = () => {
             <span className="text-3xl">🤖</span>
           </motion.div>
           <h3 className="text-2xl font-display font-bold text-white">
-            AI Recommendations
+            {t('ai.recommendations.title')}
           </h3>
         </div>
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-violet-200 border-t-violet-600"></div>
-          <p className="ml-4 text-white font-medium">Generating personalized recommendations...</p>
+          <p className="ml-4 text-white font-medium">{t('ai.recommendations.loading')}</p>
         </div>
       </motion.div>
     );
@@ -110,7 +112,7 @@ const RecommendationPanel = () => {
             <span className="text-3xl">🤖</span>
           </motion.div>
           <h3 className="text-2xl font-display font-bold text-white">
-            AI Recommendations
+            {t('ai.recommendations.title')}
           </h3>
         </div>
         <div className="glass p-4 border-l-4 border-red-500">
@@ -143,10 +145,10 @@ const RecommendationPanel = () => {
             <span className="text-3xl">🤖</span>
           </motion.div>
           <h3 className="text-2xl font-display font-bold text-white">
-            AI Recommendations
+            {t('ai.recommendations.title')}
           </h3>
         </div>
-        <p className="text-white/80">No recommendations available at this time.</p>
+        <p className="text-white/80">{t('ai.recommendations.noRecommendations')}</p>
       </motion.div>
     );
   }
@@ -181,9 +183,9 @@ const RecommendationPanel = () => {
           </motion.div>
           <div>
             <h3 className="text-2xl font-display font-bold text-gradient-animate">
-              AI Recommendations
+              {t('ai.recommendations.title')}
             </h3>
-            <p className="text-sm text-white/70">Powered by TensorFlow & Gemini AI</p>
+            <p className="text-sm text-white/70">{t('ai.recommendations.poweredBy')}</p>
           </div>
         </div>
 
@@ -216,7 +218,7 @@ const RecommendationPanel = () => {
                   rec.priority?.toLowerCase() === 'medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
                   'bg-green-100 text-green-800 border-green-200'
                 }`}>
-                  {rec.priority}
+                  {t(`ai.recommendations.priority.${rec.priority.toLowerCase()}`)}
                 </span>
               )}
             </div>
@@ -228,7 +230,7 @@ const RecommendationPanel = () => {
               className="btn-primary w-full text-sm py-2"
             >
               <span className="flex items-center justify-center gap-2">
-                Start Learning Now
+                {t('ai.recommendations.startLearning')}
                 <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

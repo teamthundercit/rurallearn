@@ -1,6 +1,6 @@
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BookOpen, Flame, Star, Trophy } from 'lucide-react';
 import useApi from '../utils/useApi';
@@ -29,6 +29,7 @@ const MoodCheckModal = lazy(() => import('../components/MoodCheckModal'));
 const DashboardPage = () => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
   const navigate = useNavigate();
+  const location = useLocation();
   const api = useApi();
   const { t } = useTranslation();
   const { shouldShowMoodCheck, recordMoodCheck } = useMoodCheck();
@@ -39,63 +40,90 @@ const DashboardPage = () => {
   const [error, setError] = useState(null);
   const [showMoodCheck, setShowMoodCheck] = useState(false);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // Fetch dashboard data function
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const token = await getAccessTokenSilently({
-          authorizationParams: {
-            audience: process.env.REACT_APP_AUTH0_AUDIENCE,
-            scope: 'openid profile email'
-          }
-        });
-
-        // Sync user with backend
-        await api.post('/api/auth/callback', {}, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        // Fetch user profile, progress data, and leaderboard
-        const [userResponse, progressResponse, leaderboardResponse] = await Promise.all([
-          getUserProfile(token),
-          getUserProgress(token),
-          getLeaderboard(token, 'week').catch(err => {
-            console.warn('Failed to fetch leaderboard:', err);
-            return null;
-          })
-        ]);
-
-        const fetchedUser = userResponse.data?.user || userResponse.user;
-        setUserData(fetchedUser);
-
-        // Check if onboarding is completed
-        if (!fetchedUser.preferences?.onboardingCompleted) {
-          navigate('/onboarding');
-          return;
+      const token = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: process.env.REACT_APP_AUTH0_AUDIENCE,
+          scope: 'openid profile email'
         }
+      });
 
-        // Handle progress data structure
-        const progressInfo = progressResponse.data || progressResponse;
-        setProgressData(progressInfo);
-        
-        // Handle leaderboard data
-        if (leaderboardResponse?.data) {
-          setLeaderboardData(leaderboardResponse.data);
+      // Sync user with backend
+      await api.post('/api/auth/callback', {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      } catch (err) {
-        console.error('Dashboard error:', err.message);
-        setError(err.response?.data?.error?.message || err.message || 'Failed to load dashboard data. Please try again.');
-      } finally {
-        setLoading(false);
+      });
+
+      // Fetch user profile, progress data, and leaderboard
+      const [userResponse, progressResponse, leaderboardResponse] = await Promise.all([
+        getUserProfile(token),
+        getUserProgress(token),
+        getLeaderboard(token, 'week').catch(err => {
+          console.warn('Failed to fetch leaderboard:', err);
+          return null;
+        })
+      ]);
+
+      const fetchedUser = userResponse.data?.user || userResponse.user;
+      setUserData(fetchedUser);
+
+      // Check if onboarding is completed
+      if (!fetchedUser.preferences?.onboardingCompleted) {
+        navigate('/onboarding');
+        return;
       }
-    };
 
+      // Handle progress data structure
+      const progressInfo = progressResponse.data || progressResponse;
+      setProgressData(progressInfo);
+      
+      // Handle leaderboard data
+      if (leaderboardResponse?.data) {
+        setLeaderboardData(leaderboardResponse.data);
+      }
+    } catch (err) {
+      console.error('Dashboard error:', err.message);
+      setError(err.response?.data?.error?.message || err.message || 'Failed to load dashboard data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
     fetchDashboardData();
   }, [getAccessTokenSilently, api, navigate]);
+
+  // Refresh when returning from lesson (location state change)
+  useEffect(() => {
+    if (location.state?.refresh) {
+      console.log('Refreshing dashboard data after lesson completion');
+      fetchDashboardData();
+      // Clear the refresh state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state]);
+
+  // Refresh data when user returns to dashboard (visibility change)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchDashboardData();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // MoodCheck: Show modal after dashboard loads
   useEffect(() => {
@@ -130,7 +158,7 @@ const DashboardPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-midnight-900">
         <div role="status" aria-live="polite">
-          <AttractiveSpinner size="lg" text="Loading your dashboard..." />
+          <AttractiveSpinner size="lg" text={t('dashboard.loadingDashboard')} />
         </div>
       </div>
     );
@@ -217,13 +245,26 @@ const DashboardPage = () => {
       {/* Main Content - Midnight Theme */}
       <main className="max-w-[1400px] mx-auto px-6 lg:px-8 py-6">
         {/* Welcome Section */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-1">
-            {t('dashboard.title', { name: displayUser?.name?.split(' ')[0] || 'User' })} 👋
-          </h1>
-          <p className="text-gray-400 text-sm">
-            {t('dashboard.subtitle')}
-          </p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-1">
+              {t('dashboard.title', { name: displayUser?.name?.split(' ')[0] || 'User' })} 👋
+            </h1>
+            <p className="text-gray-400 text-sm">
+              {t('dashboard.subtitle')}
+            </p>
+          </div>
+          <button
+            onClick={fetchDashboardData}
+            disabled={loading}
+            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-lg transition-all flex items-center gap-2 disabled:opacity-50"
+            title="Refresh dashboard data"
+          >
+            <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
         </div>
 
         {/* Stats Cards - With Icons */}
@@ -234,32 +275,28 @@ const DashboardPage = () => {
             value={metrics.completedLessons}
             total={progressData?.progress?.length || 100}
             color={{ from: 'cyan-400', to: 'blue-500' }}
-            trend={5}
             animation="scale"
           />
           <ProgressCard
             icon={<Flame className="w-6 h-6" strokeWidth={2} />}
-            title="Study Streak"
-            value={`${userData?.gamification?.streak || 0} days`}
+            title={t('dashboard.studyStreak')}
+            value={`${userData?.gamification?.streak?.current || 0} ${t('dashboard.days')}`}
             color={{ from: 'violet-400', to: 'fuchsia-500' }}
-            trend={userData?.gamification?.streak > 3 ? 8 : -2}
             animation="pulse"
           />
           <ProgressCard
             icon={<Star className="w-6 h-6" strokeWidth={2} />}
-            title="Points Earned"
+            title={t('dashboard.pointsEarned')}
             value={userData?.gamification?.totalPoints || 0}
             color={{ from: 'amber-400', to: 'yellow-500' }}
-            trend={12}
             animation="tilt"
           />
           <ProgressCard
             icon={<Trophy className="w-6 h-6" strokeWidth={2} />}
-            title="Achievements"
+            title={t('dashboard.achievements')}
             value={userData?.gamification?.badges?.length || 0}
             total={20}
             color={{ from: 'emerald-400', to: 'teal-500' }}
-            trend={userData?.gamification?.badges?.length > 5 ? 10 : 0}
             animation="scale"
           />
         </div>

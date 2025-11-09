@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const WeeklyActivityChart = ({ weeklyData }) => {
+  const { t } = useTranslation();
   if (!weeklyData || weeklyData.length === 0) {
     return (
       <div className="glass-neon-blue p-6 animate-scale-in border border-white/10 rounded-xl">
@@ -10,14 +12,14 @@ const WeeklyActivityChart = ({ weeklyData }) => {
           </div>
           <div>
             <h3 className="text-xl font-display font-bold text-white">
-              Weekly Activity
+              {t('dashboard.activity')}
             </h3>
-            <p className="text-sm text-gray-400">Your learning pattern this week</p>
+            <p className="text-sm text-gray-400">{t('dashboard.yourLearningPattern')}</p>
           </div>
         </div>
         <div className="text-center py-8">
           <span className="text-6xl mb-4 block opacity-50">📊</span>
-          <p className="text-gray-400">Start learning to see your activity chart!</p>
+          <p className="text-gray-400">{t('dashboard.startLearningToSeeChart')}</p>
         </div>
       </div>
     );
@@ -36,16 +38,16 @@ const WeeklyActivityChart = ({ weeklyData }) => {
           </div>
           <div>
             <h3 className="text-xl font-display font-bold text-white">
-              Weekly Activity
+              {t('dashboard.activity')}
             </h3>
-            <p className="text-sm text-gray-400">{totalLessons} lessons this week</p>
+            <p className="text-sm text-gray-400">{totalLessons} {t('dashboard.lessonsThisWeek')}</p>
           </div>
         </div>
         <div className="text-right">
           <div className="text-lg font-bold text-blue-400">
             {Math.round(totalTime)}m
           </div>
-          <div className="text-xs text-gray-500">total time</div>
+          <div className="text-xs text-gray-500">{t('dashboard.totalTime')}</div>
         </div>
       </div>
 

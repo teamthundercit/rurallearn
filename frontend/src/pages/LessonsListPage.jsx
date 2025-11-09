@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
+import { useTranslation } from 'react-i18next';
 import { getLessons, getRecommendations } from '../services/api';
 import AttractiveSpinner from '../components/AttractiveSpinner';
 
 const LessonsListPage = () => {
   const navigate = useNavigate();
   const { getAccessTokenSilently } = useAuth0();
+  const { t } = useTranslation();
   
   const [lessons, setLessons] = useState([]);
   const [allLessons, setAllLessons] = useState([]); // Store all lessons for tag extraction
@@ -131,7 +133,7 @@ const LessonsListPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-midnight-900">
-        <AttractiveSpinner size="lg" text="Loading lessons..." />
+        <AttractiveSpinner size="lg" text={t('dashboard.loadingLessons')} />
       </div>
     );
   }
@@ -174,7 +176,7 @@ const LessonsListPage = () => {
               <svg className="w-6 h-6 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span className="font-semibold">Back to Dashboard</span>
+              <span className="font-semibold">{t('dashboard.backToDashboard')}</span>
             </button>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -190,11 +192,11 @@ const LessonsListPage = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8 animate-slide-down">
           <h2 className="text-4xl sm:text-5xl font-display font-black mb-3">
-            <span className="text-white">Browse Lessons</span>
+            <span className="text-white">{t('dashboard.browseLessons')}</span>
             <span className="inline-block animate-bounce-slow ml-2">📚</span>
           </h2>
           <p className="text-gray-400 text-lg">
-            Discover your next learning adventure
+            {t('lessons.browse')}
           </p>
         </div>
 

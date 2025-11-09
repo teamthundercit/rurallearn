@@ -47,7 +47,31 @@
     "readyToLearn": "Ready to Learn?",
     "browseLessons": "Browse Lessons",
     "continueJourney": "Continue your learning journey with new lessons",
-    "startJourney": "Start your learning journey by exploring available lessons"
+    "startJourney": "Start your learning journey by exploring available lessons",
+    "studyStreak": "Study Streak",
+    "pointsEarned": "Points Earned",
+    "achievements": "Achievements",
+    "days": "days",
+    "backToDashboard": "Back to Dashboard",
+    "yourLatestAccomplishments": "Your latest accomplishments",
+    "completeToSeeAchievements": "Complete lessons to see your achievements!",
+    "recentActivities": "recent activities",
+    "viewAllAchievements": "View all achievements",
+    "seeHowYouRank": "See how you rank among learners",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "allTime": "All Time",
+    "yourRank": "Your Rank",
+    "greatJobTop10": "Great job! You're in the top 10!",
+    "keepLearning": "Keep learning to climb higher!",
+    "topLearners": "Top Learners",
+    "anonymousPrivacy": "All names are anonymous to protect privacy",
+    "yourLearningPattern": "Your learning pattern this week",
+    "startLearningToSeeChart": "Start learning to see your activity chart!",
+    "lessonsThisWeek": "lessons this week",
+    "totalTime": "total time",
+    "loadingDashboard": "Loading your dashboard...",
+    "loadingLessons": "Loading lessons..."
   },
   "lessons": {
     "browse": "Browse Lessons",
@@ -161,6 +185,40 @@
       "thisMonth": "This Month",
       "allTime": "All Time",
       "anonymous": "All names are anonymous to protect privacy"
+    }
+  },
+  "ai": {
+    "recommendations": {
+      "title": "AI Recommendations",
+      "poweredBy": "Powered by TensorFlow & Gemini AI",
+      "loading": "Generating personalized recommendations...",
+      "noRecommendations": "No recommendations available at this time.",
+      "startLearning": "Start Learning Now",
+      "priority": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      }
+    },
+    "adaptiveLearning": {
+      "title": "Your Learning Path",
+      "subtitle": "Personalized insights based on your performance",
+      "level": "Level",
+      "avgScore": "Avg Score",
+      "pace": "Pace",
+      "readyToLevelUp": "Ready to Level Up!",
+      "keepBuilding": "Keep Building Skills",
+      "recommendedDifficulty": "Recommended difficulty:",
+      "paces": {
+        "fast": "Fast",
+        "moderate": "Moderate",
+        "slow": "Slow"
+      },
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      }
     }
   },
   "errors": {
